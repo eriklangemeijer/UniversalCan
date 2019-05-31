@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include <Windows.h>
 #include <windef.h>
-#include "..\..\ElmWindows.h"
+#include "..\..\ElmBT.h"
 
 void messageCallback(CanMessage message)
 {
@@ -12,7 +12,7 @@ void messageCallback(CanMessage message)
 }
 int main()
 {
-	ElmWindows elm("COM2");
+	ElmBT elm("COM2");
 	elm.registerCallback(&messageCallback);
 	printf("foo");
 	while (1);

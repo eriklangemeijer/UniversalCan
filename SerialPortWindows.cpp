@@ -1,8 +1,6 @@
-#include "ElmWindows.h"
-#include <thread>
+#include "SerialPortWindows.h"
 
-
-ElmWindows::ElmWindows(std::string port) :running(false)
+SerialPortWindows::SerialPortWindows():running(false)
 {
 	comPort = CreateFileA(port.c_str(),
 				GENERIC_READ | GENERIC_WRITE,
@@ -25,10 +23,15 @@ ElmWindows::ElmWindows(std::string port) :running(false)
 		throw ERROR_CONNECTION_INVALID;
 
 	PurgeComm(comPort, PURGE_RXCLEAR | PURGE_TXCLEAR);
-
 }
 
-void ElmWindows::threadFunction(std::function<void(CanMessage)> callback, HANDLE comPort)
+SerialPortWindows::~SerialPortWindows()
+{
+    running = false;
+	CloseHandle(comPort);
+}
+
+void SerialPortWindows::threadFunction(std::function<void(std::vector<char>) callback, HANDLE comPort)
 {
 	printf("hello");
 	SetCommMask(comPort, EV_RXCHAR | EV_RXFLAG);
@@ -53,21 +56,15 @@ void ElmWindows::threadFunction(std::function<void(CanMessage)> callback, HANDLE
 	}
 }
 
-ElmWindows::~ElmWindows()
+bool SerialPortWindows::sendMessage(std::vector<char> data)
 {
-	running = false;
-	CloseHandle(comPort);
+
 }
 
-bool ElmWindows::sendMessage(std::vector<CanMessage> messages)
-{
-	return false;
-}
-
-void ElmWindows::registerCallback(std::function<void(CanMessage)> callback)
+void SerialPortWindows::registerCallback(std::function<void(std::vector<char>)> callback)
 {
 	callbackFunction = callback;
 	running = true;
-	std::thread thread_obj(&ElmWindows::threadFunction,this,callback, comPort);
+	std::thread thread_obj(&SerialPortWindows::threadFunction,this,callback, comPort);
 	thread_obj.join();
 }

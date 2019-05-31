@@ -30,7 +30,7 @@
     <ClInclude Include="..\..\CanScanner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\ElmWindows.h">
+    <ClInclude Include="..\..\ElmBT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\IAdapter.h">
@@ -47,7 +47,7 @@
     <ClCompile Include="Canscan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\ElmWindows.cpp">
+    <ClCompile Include="..\..\ElmBT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

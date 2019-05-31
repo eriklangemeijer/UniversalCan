@@ -3,7 +3,6 @@
 #include <functional>
 #include <vector>
 
-
 class IAdapter
 {
     public:

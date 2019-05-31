@@ -150,14 +150,14 @@
   <ItemGroup>
     <ClInclude Include="..\..\CanMessage.h" />
     <ClInclude Include="..\..\CanScanner.h" />
-    <ClInclude Include="..\..\ElmWindows.h" />
+    <ClInclude Include="..\..\ElmBT.h" />
     <ClInclude Include="..\..\IAdapter.h" />
     <ClInclude Include="..\..\MessageParser.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\ElmWindows.cpp" />
+    <ClCompile Include="..\..\ElmBT.cpp" />
     <ClCompile Include="Canscan.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

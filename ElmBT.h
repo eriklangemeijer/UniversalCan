@@ -1,19 +1,19 @@
-#include "IAdapter.h"
-#include <windows.h>
-class ElmWindows : public IAdapter
-{
 
+#include <String>
+
+#include "IAdapter.h"
+#include "ISerialPort.h"
+class ElmBT : public IAdapter
+{
 	private:
 		std::function<void(CanMessage)> callbackFunction;
-		HANDLE comPort;
+		std::unique_ptr<ISerialPort> comPort;
 		bool running;
-	
+		std::string version;
 	public:
-		
-
-		ElmWindows(std::string port);
-		~ElmWindows();
+		ElmBT(std::string port);
+		~ElmBT();
 		bool sendMessage(std::vector<CanMessage> messages) override;
 		void registerCallback(std::function<void(CanMessage)> callback) override;
-		void threadFunction(std::function<void(CanMessage)> callback, HANDLE comPort);
+		void serialCallback(std::string message);
 };

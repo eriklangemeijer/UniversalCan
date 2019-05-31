@@ -1,0 +1,57 @@
+<Vehicle brand="BMW" model ="GS">
+    <Module name="BMSK Control Module">
+        <Message id='10C'>
+            <Value>
+                <Description>Throttle Position (%)</Description>
+                <Byte>2</Byte>
+                <Conversion>"((BYTE(2) / 255)*100"</Conversion>"
+            </Value>
+            <Value>
+                <Description>Engine RPM</Description>
+                <Byte>3,4</Byte>
+                <Conversion>"((BYTE(4) *255 + BYTE(3) / 4"</Conversion>"
+            </Value>
+            <Value>
+                <Description>Clutch Lever/Kill Switch</Description>
+                <Byte>5H</Byte>
+                <Conversion>"0xA=Clutch in; 0x6=Clutch out; 0x5=Kill Switch On"</Conversion>"
+            </Value>
+            <Value>
+                <Description>Side Stand</Description>
+                <Byte>6H</Byte>
+                <Conversion>"5=Up; 9=Down"</Conversion>"
+            </Value>
+            <Value>
+                <Description>Throttle Position (%)</Description>
+                <Byte>7</Byte>
+                <Conversion>"(BYTE(7 / 255) * 100 "</Conversion>"
+            </Value>
+        </Message>
+        <Message id='110'>
+            <Value>
+                <Description>Throttle grip position</Description>
+                <Byte>6</Byte>
+            </Value>
+        </Message>
+        <Message id='120'>
+            <Value>
+                <Description>Front brake analog</Description>
+                <Byte>3</Byte>
+            </Value>
+            <Value>
+                <Description>Rear brake analog</Description>
+                <Byte>4</Byte>
+            </Value>
+            <Value>
+                <Description>Front brake analog(2)</Description>
+                <Byte>5</Byte>
+            </Value>
+            <Value>
+                <Description>Rear brake analog(2)</Description>
+                <Byte>6</Byte>
+            </Value>
+        </Message>
+        
+        
+    </Module>
+</Vehicle>

@@ -1,0 +1,11 @@
+﻿Description;Message ID;Module;Data;byte(s);Conversion
+Throttle Position (%);10C;BMSK Control Module;;2;((BYTE<2>) / 255) *100
+Engine RPM;10C;BMSK Control Module;;3,4;((BYTE<4>) *255 + BYTE<3>) / 4
+Clutch Lever/Kill Switch;10C;BMSK Control Module;;5H;"0xA=Clutch in; 0x6=Clutch out; 0x5=Kill Switch On"
+Side Stand;10C;BMSK Control Module;;6H;"5=Up; 9=Down"
+Throttle Position (%);10C;BMSK Control Module;;7;(BYTE<7> / 255) * 100 
+Throttle grip position;110;BMSK Control Module;;6;<NONE>
+Brake analog pressures;120;BMSK Control Module;;3;<NONE>
+Brake analog pressures;121;BMSK Control Module;;4;<NONE>
+Brake analog pressures;122;BMSK Control Module;;5;<NONE>
+Brake analog pressures;123;BMSK Control Module;;6;<NONE>
