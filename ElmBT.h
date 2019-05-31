@@ -1,6 +1,9 @@
 
 #include <String>
 
+#include <vector>
+#include <memory>
+#include <functional>
 #include "IAdapter.h"
 #include "ISerialPort.h"
 class ElmBT : public IAdapter

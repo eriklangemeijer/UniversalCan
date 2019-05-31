@@ -1,20 +1,23 @@
 #include "ElmBT.h"
-#include "SerialPortOSX.h"
+#include "SerialPortWindows.h"
 #include <thread>
-
+#include <iostream>
 void ElmBT::serialCallback(std::string message)
 {
 	if(!running && message.find(">"))
 	{
-		if(sscanf(message.c_str,"ELM327 %s",version))
+		/*
+		char buff[20];
+		if(sscanf(message.c_str,"ELM327 %s", buff))
 		{
-			std::cout << "Found an adapter with version " << version << std::endl;
+			std::cout << "Found an adapter with version " << buff << std::endl;
 			running = true;
 		}
 		else
 			std::cout << "Could not verify version of connected adapter.";
-
+		
 		return;
+		*/
 	}
 }
 
@@ -22,10 +25,11 @@ ElmBT::ElmBT(std::string port) :
 	running(false)
 {
 
-	comPort = new SerialPortOSX();
-	comPort->registerCallback(std::bind(&(ElmBT::serialCallback),this,std::placeholders::_1));
+	comPort = std::make_unique<SerialPortWindows>(port);
+	comPort->sendString("ATZ\n\r");
+	comPort->registerCallback(std::bind(&ElmBT::serialCallback, this,
+		std::placeholders::_1));
 
-	comPort->sendString("ATZ");
 
 }
 
@@ -38,6 +42,7 @@ bool ElmBT::sendMessage(std::vector<CanMessage> messages)
 {
 	if(!running)
 		return false;
+	return true;
 }
 
 void ElmBT::registerCallback(std::function<void(CanMessage)> callback)

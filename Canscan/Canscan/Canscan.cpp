@@ -12,7 +12,7 @@ void messageCallback(CanMessage message)
 }
 int main()
 {
-	ElmBT elm("COM2");
+	ElmBT elm("COM4");
 	elm.registerCallback(&messageCallback);
 	printf("foo");
 	while (1);
