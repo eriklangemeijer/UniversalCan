@@ -25,7 +25,7 @@ ElmBT::ElmBT(std::string port) :
 	running(false)
 {
 
-	comPort = std::make_unique<SerialPortWindows>(port);
+	comPort = std::make_unique<SerialPortOSX>(port);
 	comPort->sendString("ATZ\n\r");
 	comPort->registerCallback(std::bind(&ElmBT::serialCallback, this,
 		std::placeholders::_1));

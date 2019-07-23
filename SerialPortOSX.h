@@ -25,8 +25,9 @@ class SerialPortOSX : public ISerialPort
         char buffer[BUFFERSIZE];
 
     public:
-        SerialPortOSX(std::string location);
+        SerialPortOSX();
         ~SerialPortOSX();
         bool sendMessage(std::vector<char> data);
-        void registerCallback(std::function<void(std::vector<char>)> callback);
+        bool sendString(std::string data);
+        void registerCallback(std::function<void(std::string)> callback);
 };

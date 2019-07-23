@@ -1,11 +1,7 @@
-#include <iostream>     // cout, endl
-#include <fstream>      // fstream
-#include <vector>
 #include <string>
-#include <algorithm>    // copy
-#include <iterator>     // ostream_operator
+#include <vector>
+#include stream;
 
-#include <boost/tokenizer.hpp>
 #include "libraries/tinyxml2.h"
 
 #include "CanMessage.h"
@@ -32,30 +28,22 @@ xmlReader::xmlReader(std::string file)
     //     auto foo = root->GetText();
     //     std::cout<<foo;
     // }
-        using namespace std;
-    using namespace boost;
+    using namespace std;
+   std::string tmp;
+    std::stringstream str_strm(file.c_str);
+   vector<string> words;
+   char delim = ','; // Ddefine the delimiter to split by
 
-    string data(file.c_str());
+   while (std::getline(str_strm, tmp, delim)) {
+      // Provide proper checks here for tmp like if empty
+      // Also strip down symbols like !, ., ?, etc.
+      // Finally push it.
+      words.push_back(tmp);
+   }
 
-    ifstream in(data.c_str());
-
-    typedef tokenizer< escaped_list_separator<char> > Tokenizer;
-
-    vector< string > vec;
-    string line;
-
-    while (getline(in,line))
-    {
-        Tokenizer tok(line);
-        vec.assign(tok.begin(),tok.end());
-
-        if (vec.size() < 3) continue;
-
-        copy(vec.begin(), vec.end(),
-             ostream_iterator<string>(cout, "|"));
-
-        cout << "\n----------------------" << endl;
-    }
+   for(auto it = words.begin(); it != words.end(); it++) {
+      std::cout << *it << std::endl;
+   }
 }
 xmlReader::~xmlReader()
 {
