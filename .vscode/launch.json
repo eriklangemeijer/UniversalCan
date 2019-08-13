@@ -1,0 +1,20 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "android",
+            "name": "Android",
+            "request": "launch",
+            "appSrcRoot": "${workspaceRoot}/source/android/app/src/main",
+            "apkFile": "${workspaceRoot}/source/android/app/build/outputs/apk/debug/app-debug.apk",
+            "preLaunchTask": "Android gradle build",
+            "internalConsoleOptions": "openOnSessionStart",
+            "autoStartADB": true,
+            "adbPort": 5037,            
+            "trace": true
+        }
+    ]
+}
