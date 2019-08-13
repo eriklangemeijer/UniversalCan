@@ -14,6 +14,31 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "type": "shell",
+            "label": "OSX",
+            "command": "/usr/bin/g++",
+            "args": [
+                "-std=c++17",
+                "-stdlib=libc++",
+                "-g",
+                "${workspaceFolder}/main.cpp",
+                "${workspaceFolder}/SerialPortOSX.cpp",
+                //"${workspaceFolder}/libraries/*.cpp",
+                "-o",
+                "${workspaceFolder}/out/CanScan"
+            ],
+            "options": {
+                "cwd": "/usr/bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }

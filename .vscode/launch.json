@@ -15,6 +15,20 @@
             "autoStartADB": true,
             "adbPort": 5037,            
             "trace": true
+        },
+        {
+            "name": "OSX",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/out/CanScan",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "lldb",
+            "preLaunchTask": "CanscanOSX"            
+            
         }
     ]
 }
