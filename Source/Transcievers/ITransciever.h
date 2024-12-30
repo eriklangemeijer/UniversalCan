@@ -4,7 +4,7 @@
 #include <vector>
 
 
-class IAdapter
+class ITransciever
 {
     public:
         virtual bool sendMessage(std::vector<CanMessage> messages) = 0;
