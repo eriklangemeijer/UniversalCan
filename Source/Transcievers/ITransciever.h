@@ -7,7 +7,9 @@
 class ITransciever
 {
     public:
-        virtual bool sendMessage(std::vector<CanMessage> messages) = 0;
-        virtual void registerCallback(std::function<void(CanMessage)> callback) = 0;
-
+        virtual bool open(const std::string& port);
+        virtual void close();
+        virtual bool write(const std::vector<uint8_t>& data);
+        virtual bool read(std::vector<uint8_t>& buffer, size_t size);
+        virtual void registerCallback(std::function<void(std::vector<uint8_t>)> callback);
 };

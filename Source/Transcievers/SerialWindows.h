@@ -18,11 +18,6 @@ private:
 
 public:
     SerialWindows();
-    ~SerialWindows() override;
+    ~SerialWindows();
 
-    bool open(const std::string& port) override;
-    void close() override;
-    bool write(const std::vector<uint8_t>& data) override;
-    bool read(std::vector<uint8_t>& buffer, size_t size) override;
-    void registerCallback(std::function<void(std::vector<uint8_t>)> callback) override;
 };
