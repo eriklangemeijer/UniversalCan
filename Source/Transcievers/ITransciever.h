@@ -1,15 +1,14 @@
-#include "CanMessage.h"
+#include <CanMessage.h>
 
 #include <functional>
 #include <vector>
+#include <String>
 
 
 class ITransciever
 {
     public:
-        virtual bool open(const std::string& port);
-        virtual void close();
-        virtual bool write(const std::vector<uint8_t>& data);
-        virtual bool read(std::vector<uint8_t>& buffer, size_t size);
-        virtual void registerCallback(std::function<void(std::vector<uint8_t>)> callback);
+        virtual void start() = 0;
+		virtual bool sendMessage(std::vector<CanMessage> messages) = 0;
+		virtual void registerCallback(std::function<void(CanMessage)> callback) = 0;
 };
