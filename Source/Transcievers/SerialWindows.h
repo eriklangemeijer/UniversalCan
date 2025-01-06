@@ -11,7 +11,7 @@ class SerialWindows : public ISerial {
 private:
     HANDLE comPort;
     bool running;
-    std::function<void(std::vector<uint8_t>)> callback;
+    std::function<void(std::string)> callbackPtr;
 
     // Internal thread function to handle incoming data
     void threadFunction();
@@ -19,5 +19,12 @@ private:
 public:
     SerialWindows();
     ~SerialWindows();
+
+    bool open(const std::string& port) override;
+    void close() override;
+    bool writeString(std::string data) override;
+    bool write(const std::vector<uint8_t>& data) override;
+    std::string read() override;
+    void registerCallback(std::function<void(std::string)> callback) override;
 
 };

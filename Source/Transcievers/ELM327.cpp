@@ -1,10 +1,10 @@
 #include "ELM327.h"
 #include "ISerial.h"
+#include <iostream>
+
 
 ELM327::ELM327(std::unique_ptr<ISerial> serial) 
     : serial(std::move(serial)), running(false) {
-        serial.registerCallback(serialReceiveCallback);
-        serial.write("AT Z\n");
             
     }
 
@@ -13,9 +13,16 @@ ELM327::~ELM327() {
     serial->close();
 }
 
-void ELM327::serialReceiveCallback(std::vector<uint8_t> message) {
-    if(message == "ELM327 v2.0\n>") {
-        this.running = true;
+void ELM327::start() {
+    serial->writeString("ATZ\r");
+
+}
+
+
+void ELM327::serialReceiveCallback(std::string message) {
+    // std::cout << "REC:" << message << std::endl;
+    if(message == "ELM327 v2.0\r\r>" or message == "\r\rELM327 v1.3a\r\r>") {
+        this->running = true;
     }
 }
 
@@ -31,16 +38,11 @@ bool ELM327::sendMessage(std::vector<CanMessage> messages) {
 }
 
 void ELM327::registerCallback(std::function<void(CanMessage)> callback) {
-    callbackFunction = callback;
+    
+    serial->registerCallback([this](std::string message) {
+        this->serialReceiveCallback(message);
+    });
+    this->callbackFunction = callback;
     running = true;
 
-    serial->registerCallback([this](const std::vector<uint8_t>& data) {
-        CanMessage message;
-        if (data.size() == sizeof(CanMessage)) {
-            memcpy(&message, data.data(), sizeof(CanMessage));
-            if (callbackFunction) {
-                callbackFunction(message);
-            }
-        }
-    });
 }
