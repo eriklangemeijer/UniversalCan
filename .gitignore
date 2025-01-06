@@ -1,0 +1,5 @@
+# The build folder 
+build
+
+# Local folder to keep datasheets close to project
+DataSheets
