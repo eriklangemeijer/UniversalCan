@@ -28,8 +28,8 @@ ENDFUNCTION(PREPEND)
 # After a normal build, we can specify the location of various outputs of the
 # build. We put executables and static libraries outside the build directory in
 # bin/ and lib/, respectively.
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "lib")
 
 # Find LAPACK on the system. This is mostly for demonstration.
 # find_package(LAPACK REQUIRED)
