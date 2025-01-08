@@ -1,4 +1,5 @@
 #include "SerialWindows.h"
+#include <stdexcept>
 
 SerialWindows::SerialWindows() 
     : comPort(INVALID_HANDLE_VALUE), running(false) {}
@@ -31,7 +32,16 @@ bool SerialWindows::open(const std::string& port) {
     comParams.fDtrControl = DTR_CONTROL_ENABLE;
     comParams.EvtChar = '\r';
 
+// COMMTIMEOUTS timeouts={0};
+// timeouts.ReadIntervalTimeout=50;
+// timeouts.ReadTotalTimeoutConstant=50;
+// timeouts.ReadTotalTimeoutMultiplier=10;
 
+// timeouts.WriteTotalTimeoutConstant=50;
+// timeouts.WriteTotalTimeoutMultiplier=10;
+// if(!SetCommTimeouts(comPort, &timeouts)){
+// //error occureed. Inform user
+// }
 
     if (!SetCommState(comPort, &comParams)) {
         return false;
@@ -50,6 +60,10 @@ void SerialWindows::close() {
 }
 
 bool SerialWindows::writeString(std::string data) {
+    if (data.rfind("AT", 0) != 0) { 
+        throw std::runtime_error("Trying to send something that is not an AT command. To prevent self harm this is currently not possible");
+        
+    }
     // Convert the string to a vector of uint8_t
     std::vector<uint8_t> byteData(data.begin(), data.end());
 
@@ -72,7 +86,7 @@ std::string SerialWindows::read() {
     }
     std::vector<uint8_t> buffer(1024); // Example buffer size
     unsigned long bytesRead;
-    bool ret = ReadFile(comPort, buffer.data(), buffer.size(), &bytesRead, NULL);
+    ReadFile(comPort, buffer.data(), buffer.size(), &bytesRead, NULL);
     if(bytesRead > 0) {
         buffer.resize(bytesRead); // Adjust size to actual bytes read
         if (this->callbackPtr) {
@@ -95,7 +109,7 @@ void SerialWindows::threadFunction() {
     OVERLAPPED ov = { 0 };
     ov.hEvent = CreateEvent(0, true, 0, 0);
     unsigned long reason;
-
+    std::string stringBuffer;
     while (running) {
         WaitCommEvent(comPort, &reason, &ov);
         if (WaitForSingleObject(ov.hEvent, INFINITE) == WAIT_OBJECT_0) {
@@ -103,11 +117,16 @@ void SerialWindows::threadFunction() {
             unsigned long bytesRead;
             bool ret = ReadFile(comPort, buffer.data(), buffer.size(), &bytesRead, &ov);
             if(bytesRead > 0) {
-                buffer.resize(bytesRead); // Adjust size to actual bytes read
-                if (this->callbackPtr) {
-                    std::string str;
-                    str.assign(buffer.begin(), buffer.end());
-                    this->callbackPtr(std::move(str));
+                for(uint8_t character : buffer) {
+                    if(character == '\r') {   
+                        if(!(stringBuffer.empty())) { 
+                            this->callbackPtr(std::move(stringBuffer));
+                            stringBuffer.clear();
+                        }
+                    }
+                    else if(character != 0) {
+                        stringBuffer.push_back(character);
+                    }
                 }
             }
         }

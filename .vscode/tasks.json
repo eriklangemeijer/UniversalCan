@@ -8,13 +8,13 @@
 			"args": [
 				"-fdiagnostics-color=always",
 				"-g",
-				"${workspaceFolder}/Source/CanScanner.cpp",
+				"${workspaceFolder}/Source/ProtocolMapper.cpp",
 				"${workspaceFolder}/Source/Transcievers/ELM327.cpp", 
 				"${workspaceFolder}/Source/Transcievers/SerialWindows.cpp",  
 				"-I", "${workspaceFolder}/Source/Transcievers",
 				"-I", "${workspaceFolder}/Source",
 				"-o",
-				"${workspaceFolder}/build/CanScanner.out"
+				"${workspaceFolder}/build/ProtocolMapper.out"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}/Source"

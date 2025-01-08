@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/CanScanner.out",
+            "program": "${workspaceFolder}/build/ProtocolMapper.out",
             "preLaunchTask": "C/C++: Can scanner",
             "args": [],
             "stopAtEntry": false,
