@@ -1,7 +1,16 @@
 #include <ELM327.h>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+    #define WINDOWS
+#endif
+
+#if WINDOWS
 #include "SerialWindows.h"
+#elif __APPLE__
+#include "SerialMacOS.h"
+#endif
 #include <stdexcept>
 #include <iostream>
+#include <memory> 
 
 void canMessageReceiveCallback(std::string message) {
     if(message == "ELM327 v2.0\r\r>" or message == "ELM327 v1.3a\r\r>") {
@@ -11,7 +20,12 @@ void canMessageReceiveCallback(std::string message) {
 
 int main() {
     try {
+        #if WINDOWS
         auto serial = std::make_unique<SerialWindows>();
+        #elif __APPLE__
+        auto serial = std::make_unique<SerialMacOS>();
+        #endif
+        
         if (!serial->open("COM9")) {
             throw std::runtime_error("Failed to open serial port");
         }
