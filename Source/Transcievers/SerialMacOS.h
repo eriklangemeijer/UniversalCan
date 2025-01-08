@@ -9,24 +9,24 @@
 #include <atomic>
 
 class SerialMacOS : public ISerial {
-public:
-    SerialMacOS();
-    ~SerialMacOS();
-
-    bool open(const std::string& port);
-    void close();
-    bool write(const std::vector<uint8_t>& data);
-    bool read(std::vector<uint8_t>& buffer, size_t size);
-    void registerCallback(std::function<void(std::vector<uint8_t>)> callback);
-
 private:
     void readLoop();
 
     int fd_;
-    std::atomic<bool> running_;
-    std::thread readerThread_;
     std::mutex mutex_;
     std::mutex callbackMutex_;
-    std::function<void(std::vector<uint8_t>)> callback_;
+    bool running;
+    std::function<void(std::string)> callbackPtr;
+    void threadFunction();
+public:
+    SerialMacOS();
+    ~SerialMacOS();
+
+    bool open(const std::string& port) override;
+    void close() override;
+    bool writeString(std::string data) override;
+    bool write(const std::vector<uint8_t>& data) override;
+    std::string read() override;
+    void registerCallback(std::function<void(std::string)> callback) override;
 };
 

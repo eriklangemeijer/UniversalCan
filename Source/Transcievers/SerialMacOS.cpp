@@ -5,7 +5,7 @@
 #include <termios.h>
 #include <chrono>
 
-SerialMacOS::SerialMacOS() : fd_(-1), running_(false) {}
+SerialMacOS::SerialMacOS() : fd_(-1), running(false) {}
 
 SerialMacOS::~SerialMacOS() {
     close();
@@ -36,8 +36,7 @@ bool SerialMacOS::open(const std::string& port) {
 
     tcsetattr(fd_, TCSANOW, &options);
 
-    running_ = true;
-    readerThread_ = std::thread(&SerialMacOS::readLoop, this);
+    this->running = true;
 
     return true;
 }
@@ -45,17 +44,26 @@ bool SerialMacOS::open(const std::string& port) {
 void SerialMacOS::close() {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    if (running_) {
-        running_ = false;
-        if (readerThread_.joinable()) {
-            readerThread_.join();
-        }
+    if (this->running) {
+        this->running = false;
     }
 
     if (fd_ != -1) {
         ::close(fd_);
         fd_ = -1;
     }
+}
+
+bool SerialMacOS::writeString(std::string data) {
+    if (data.rfind("AT", 0) != 0) { 
+        throw std::runtime_error("Trying to send something that is not an AT command. To prevent self harm this is currently not possible");
+        
+    }
+    // Convert the string to a vector of uint8_t
+    std::vector<uint8_t> byteData(data.begin(), data.end());
+
+    // Call the `write` function with the converted data
+    return write(byteData);
 }
 
 bool SerialMacOS::write(const std::vector<uint8_t>& data) {
@@ -70,40 +78,42 @@ bool SerialMacOS::write(const std::vector<uint8_t>& data) {
     return bytesWritten == static_cast<ssize_t>(data.size());
 }
 
-bool SerialMacOS::read(std::vector<uint8_t>& buffer, size_t size) {
+std::string SerialMacOS::read() {
     std::lock_guard<std::mutex> lock(mutex_);
 
     if (fd_ == -1) {
         std::cerr << "Port not open for reading." << std::endl;
-        return false;
+        return "";
     }
-
-    buffer.resize(size);
-    ssize_t bytesRead = ::read(fd_, buffer.data(), size);
+    std::vector<uint8_t> buffer(1024); // Example buffer size
+    ssize_t bytesRead = ::read(fd_, buffer.data(), buffer.size());
     if (bytesRead <= 0) {
         buffer.clear();
-        return false;
+        return "";
     }
 
     buffer.resize(bytesRead);
-    return true;
+    std::string stringBuffer(buffer.begin(), buffer.end());
+    return stringBuffer;
 }
 
-void SerialMacOS::registerCallback(std::function<void(std::vector<uint8_t>)> callback) {
-    std::lock_guard<std::mutex> lock(callbackMutex_);
-    callback_ = callback;
+void SerialMacOS::registerCallback(std::function<void(std::string)> callback) {
+    this->callbackPtr = callback;
+    running = true;
+    std::thread(&SerialMacOS::threadFunction, this).detach();
 }
 
-void SerialMacOS::readLoop() {
+
+void SerialMacOS::threadFunction() {
     std::vector<uint8_t> buffer(1024);
 
-    while (running_) {
+    while (this->running) {
         ssize_t bytesRead = ::read(fd_, buffer.data(), buffer.size());
         if (bytesRead > 0) {
-            std::vector<uint8_t> data(buffer.begin(), buffer.begin() + bytesRead);
+            std::string stringBuffer(buffer.begin(), buffer.begin() + bytesRead);
             std::lock_guard<std::mutex> lock(callbackMutex_);
-            if (callback_) {
-                callback_(data);
+            if (this->callbackPtr) {
+                this->callbackPtr(stringBuffer);
             }
         } else {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
