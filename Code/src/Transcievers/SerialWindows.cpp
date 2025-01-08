@@ -1,4 +1,4 @@
-#include "SerialWindows.h"
+#include <Transcievers/SerialWindows.h>
 #include <stdexcept>
 
 SerialWindows::SerialWindows() 
@@ -21,15 +21,15 @@ bool SerialWindows::open(const std::string& port) {
     }
 
     DCB com_params = { 0 };
-    if (!GetCommState(comPort, &comParams)) {
+    if (!GetCommState(comPort, &com_params)) {
         return false;
     }
 
-    comParams.BaudRate = CBR_38400;
+    com_params.BaudRate = CBR_38400;
     com_params.ByteSize = 8;
-    comParams.StopBits = ONESTOPBIT;
-    comParams.Parity = NOPARITY;
-    comParams.fDtrControl = DTR_CONTROL_ENABLE;
+    com_params.StopBits = ONESTOPBIT;
+    com_params.Parity = NOPARITY;
+    com_params.fDtrControl = DTR_CONTROL_ENABLE;
     com_params.EvtChar = '\r';
 
 // COMMTIMEOUTS timeouts={0};
@@ -43,7 +43,7 @@ bool SerialWindows::open(const std::string& port) {
 // //error occureed. Inform user
 // }
 
-    if (!SetCommState(comPort, &comParams)) {
+    if (!SetCommState(comPort, &com_params)) {
         return false;
     }
 
@@ -68,7 +68,7 @@ bool SerialWindows::writeString(std::string data) {
     std::vector<uint8_t> byte_data(data.begin(), data.end());
 
     // Call the `write` function with the converted data
-    return write(byteData);
+    return write(byte_data);
 }
 
 bool SerialWindows::write(const std::vector<uint8_t>& data) {
@@ -77,7 +77,7 @@ bool SerialWindows::write(const std::vector<uint8_t>& data) {
     }
 
     DWORD bytes_written;
-    return WriteFile(comPort, data.data(), static_cast<DWORD>(data.size()), &bytesWritten, NULL);
+    return WriteFile(comPort, data.data(), static_cast<DWORD>(data.size()), &bytes_written, NULL);
 }
 
 std::string SerialWindows::read() {
@@ -86,7 +86,7 @@ std::string SerialWindows::read() {
     }
     std::vector<uint8_t> buffer(SERIAL_READ_BUFFER_SIZE); // Example buffer size
     unsigned long bytes_read = 0;
-    ReadFile(comPort, buffer.data(), buffer.size(), &bytesRead, NULL);
+    ReadFile(comPort, buffer.data(), buffer.size(), &bytes_read, NULL);
     if(bytes_read > 0) {
         buffer.resize(bytes_read); // Adjust size to actual bytes read
         if (this->callbackPtr) {
@@ -114,17 +114,17 @@ void SerialWindows::threadFunction() {
         if (WaitForSingleObject(ov.hEvent, INFINITE) == WAIT_OBJECT_0) {
             std::vector<uint8_t> buffer(SERIAL_READ_BUFFER_SIZE); // Example buffer size
             unsigned long bytes_read = 0;
-            ReadFile(comPort, buffer.data(), buffer.size(), &bytesRead, &ov);
+            ReadFile(comPort, buffer.data(), buffer.size(), &bytes_read, &ov);
             if(bytes_read > 0) {
                 for(uint8_t character : buffer) {
                     if(character == '\r') {   
-                        if(!(stringBuffer.empty())) { 
-                            this->callbackPtr(std::move(stringBuffer));
-                            stringBuffer.clear();
+                        if(!(string_buffer.empty())) { 
+                            this->callbackPtr(std::move(string_buffer));
+                            string_buffer.clear();
                         }
                     }
                     else if(character != 0) {
-                        stringBuffer.push_back(character);
+                        string_buffer.push_back(character);
                     }
                 }
             }

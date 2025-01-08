@@ -3,11 +3,12 @@
     #define WINDOWS
 #endif
 
-#if WINDOWS
-#include "SerialWindows.h"
+#ifdef WINDOWS
+    #include <Transcievers/SerialWindows.h>
 #elif __APPLE__
-#include <Transcievers/SerialMacOS.h>
+    #include <Transcievers/SerialMacOS.h>
 #endif
+
 #include <stdexcept>
 #include <iostream>
 #include <memory> 
@@ -20,12 +21,12 @@ void canMessageReceiveCallback(std::string message) {
 
 int main() {
     try {
-        #if WINDOWS
-        auto serial = std::make_unique<SerialWindows>();
-        const std::string port_name = "COM9";
+        #ifdef WINDOWS
+            auto serial = std::make_unique<SerialWindows>();
+            const std::string port_name = "COM9";
         #elif __APPLE__
-        auto serial = std::make_unique<SerialMacOS>();
-        const std::string port_name = "/dev/tty.usbserial-10";
+            auto serial = std::make_unique<SerialMacOS>();
+            const std::string port_name = "/dev/tty.usbserial-10";
         #endif
         
         if (!serial->open(port_name)) {
