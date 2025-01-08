@@ -1,6 +1,7 @@
 #include <ELM327.h>
 #include "SerialWindows.h"
 #include <stdexcept>
+#include <iostream>
 
 void canMessageReceiveCallback(std::string message) {
     if(message == "ELM327 v2.0\r\r>" or message == "ELM327 v1.3a\r\r>") {
@@ -23,14 +24,20 @@ int main() {
 
         elm327.registerCallback([](const CanMessage& msg) {
             // Handle incoming CAN message
-            printf("Received CAN message\n");
+            std::cout << "Received CAN message\n";
         });
         elm327.start();
         // // Send a test message
         // std::vector<CanMessage> messages = { /* populate messages */ };
         // elm327.sendMessage(messages);
 
-        while(true) {};
+        while(true) {
+            if(elm327.messageAvailable())
+            {
+                std::string message = elm327.readMessage();
+                std::cout << message.c_str() << std::endl;
+            }
+        };
 
     } catch (const std::exception& e) {
         printf("Error: %s\n", e.what());

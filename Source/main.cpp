@@ -1,5 +1,10 @@
 #include "ELM327.h"
 #include "SerialWindows.h"
+#include <stdexcept>
+
+void function_name(){
+    
+}
 
 int main() {
     try {
