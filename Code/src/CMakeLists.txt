@@ -1,8 +1,12 @@
 set(UniversalCan_SRC
     ProtocolMapper.cpp
     Transcievers/ELM327.cpp
-    Transcievers/SerialMacOS.cpp
 )
+if(WIN32)
+    list(APPEND UniversalCan_SRC Transcievers/SerialWindows.cpp)
+elseif(APPLE)
+    list(APPEND UniversalCan_SRC Transcievers/SerialMacOS.cpp)
+endif()
 # Form the full path to the source files...
 PREPEND(UniversalCan_SRC)
 # ... and pass the variable to the parent scope.
