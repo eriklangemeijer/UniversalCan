@@ -1,9 +1,12 @@
-#include "ELM327.h"
-#include "ISerial.h"
+#include <Transcievers/ELM327.h>
+#include <Transcievers/ISerial.h>
 #include <iostream>
 #include <algorithm>
 #include <chrono>
 #include <thread>
+
+const uint16_t response_wait_sleep_time_ns = 10;
+const uint16_t response_wait_timeout_ms = 50;
 
 ELM327::ELM327(std::unique_ptr<ISerial> serial) 
     : serial(std::move(serial)), running(false), ready(false) {
@@ -16,13 +19,10 @@ ELM327::~ELM327() {
 }
 
 void ELM327::start() {
-    this->serial->writeString("AT L0\r");
-    this->serial->writeString("AT E0\r");
-    this->serial->writeString("AT Z\r");
-    while(!ready) {
-        std::this_thread::sleep_for(std::chrono::nanoseconds(10));
-    }
-    this->serial->writeString("AT RV\r");
+    sendATMessage("L0");
+    sendATMessage("E0");
+    sendATMessage("Z");
+    sendATMessage("RV");
     // serial->writeString("AT DP\r");
     // serial->writeString("AT MA\r");
 
@@ -44,6 +44,22 @@ bool ELM327::sendMessage(std::vector<CanMessage> messages) {
                                   reinterpret_cast<const uint8_t*>(&msg) + sizeof(msg));
         if (!serial->write(data)) {
             return false;
+        }
+    }
+    return true;
+}
+
+bool ELM327::sendATMessage(std::string command, bool waitForResponse) {
+    this->serial->writeString("AT" + command + "\r");
+
+    if (waitForResponse) {
+        auto start_time = std::chrono::steady_clock::now();
+        while (!ready) {
+            std::this_thread::sleep_for(std::chrono::nanoseconds(response_wait_sleep_time_ns));
+            auto elapsed_time = std::chrono::steady_clock::now() - start_time;
+            if (std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_time).count() >= response_wait_timeout_ms) {
+                return false;
+            }
         }
     }
     return true;

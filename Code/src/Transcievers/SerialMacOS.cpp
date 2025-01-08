@@ -1,4 +1,4 @@
-#include "SerialMacOS.h"
+#include <Transcievers/SerialMacOS.h>
 #include <iostream>
 #include <fcntl.h>
 #include <unistd.h>
@@ -22,8 +22,8 @@ bool SerialMacOS::open(const std::string& port) {
 
     struct termios options;
     tcgetattr(fd_, &options);
-    cfsetispeed(&options, B115200);
-    cfsetospeed(&options, B115200);
+    cfsetispeed(&options, B38400);
+    cfsetospeed(&options, B38400);
     options.c_cflag |= (CLOCAL | CREAD);
     options.c_cflag &= ~CSIZE;
     options.c_cflag |= CS8;
@@ -60,10 +60,10 @@ bool SerialMacOS::writeString(std::string data) {
         
     }
     // Convert the string to a vector of uint8_t
-    std::vector<uint8_t> byteData(data.begin(), data.end());
+    std::vector<uint8_t> byte_data(data.begin(), data.end());
 
     // Call the `write` function with the converted data
-    return write(byteData);
+    return write(byte_data);
 }
 
 bool SerialMacOS::write(const std::vector<uint8_t>& data) {
@@ -74,8 +74,8 @@ bool SerialMacOS::write(const std::vector<uint8_t>& data) {
         return false;
     }
 
-    ssize_t bytesWritten = ::write(fd_, data.data(), data.size());
-    return bytesWritten == static_cast<ssize_t>(data.size());
+    ssize_t bytes_written = ::write(fd_, data.data(), data.size());
+    return bytes_written == static_cast<ssize_t>(data.size());
 }
 
 std::string SerialMacOS::read() {
@@ -85,16 +85,16 @@ std::string SerialMacOS::read() {
         std::cerr << "Port not open for reading." << std::endl;
         return "";
     }
-    std::vector<uint8_t> buffer(1024); // Example buffer size
-    ssize_t bytesRead = ::read(fd_, buffer.data(), buffer.size());
-    if (bytesRead <= 0) {
+    std::vector<uint8_t> buffer(SERIAL_READ_BUFFER_SIZE); // Example buffer size
+    ssize_t bytes_read = ::read(fd_, buffer.data(), buffer.size());
+    if (bytes_read <= 0) {
         buffer.clear();
         return "";
     }
 
-    buffer.resize(bytesRead);
-    std::string stringBuffer(buffer.begin(), buffer.end());
-    return stringBuffer;
+    buffer.resize(bytes_read);
+    std::string string_buffer(buffer.begin(), buffer.end());
+    return string_buffer;
 }
 
 void SerialMacOS::registerCallback(std::function<void(std::string)> callback) {
@@ -105,15 +105,24 @@ void SerialMacOS::registerCallback(std::function<void(std::string)> callback) {
 
 
 void SerialMacOS::threadFunction() {
-    std::vector<uint8_t> buffer(1024);
+    std::vector<int8_t> buffer(SERIAL_READ_BUFFER_SIZE);
 
+    std::string string_buffer;
     while (this->running) {
-        ssize_t bytesRead = ::read(fd_, buffer.data(), buffer.size());
-        if (bytesRead > 0) {
-            std::string stringBuffer(buffer.begin(), buffer.begin() + bytesRead);
-            std::lock_guard<std::mutex> lock(callbackMutex_);
-            if (this->callbackPtr) {
-                this->callbackPtr(stringBuffer);
+        ssize_t bytes_read = ::read(fd_, buffer.data(), buffer.size());
+        if (bytes_read > 0) {
+            if(bytes_read > 0) {
+                for(int8_t character : buffer) {
+                    if(character == '\r') {   
+                        if(!(string_buffer.empty())) { 
+                            this->callbackPtr(std::move(string_buffer));
+                            string_buffer.clear();
+                        }
+                    }
+                    else if(character != 0) {
+                        string_buffer.push_back(character);
+                    }
+                }
             }
         } else {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
