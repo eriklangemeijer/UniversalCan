@@ -1,7 +1,7 @@
 #include "ITransciever.h"
 #include "ISerial.h"
 #include <memory>
-#include <String>
+#include <string>
 #include <list>
 #include <mutex>
 

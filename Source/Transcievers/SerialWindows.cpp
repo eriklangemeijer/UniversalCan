@@ -20,17 +20,17 @@ bool SerialWindows::open(const std::string& port) {
         return false;
     }
 
-    DCB comParams = { 0 };
+    DCB com_params = { 0 };
     if (!GetCommState(comPort, &comParams)) {
         return false;
     }
 
     comParams.BaudRate = CBR_38400;
-    comParams.ByteSize = 8;
+    com_params.ByteSize = 8;
     comParams.StopBits = ONESTOPBIT;
     comParams.Parity = NOPARITY;
     comParams.fDtrControl = DTR_CONTROL_ENABLE;
-    comParams.EvtChar = '\r';
+    com_params.EvtChar = '\r';
 
 // COMMTIMEOUTS timeouts={0};
 // timeouts.ReadIntervalTimeout=50;
@@ -65,7 +65,7 @@ bool SerialWindows::writeString(std::string data) {
         
     }
     // Convert the string to a vector of uint8_t
-    std::vector<uint8_t> byteData(data.begin(), data.end());
+    std::vector<uint8_t> byte_data(data.begin(), data.end());
 
     // Call the `write` function with the converted data
     return write(byteData);
@@ -76,7 +76,7 @@ bool SerialWindows::write(const std::vector<uint8_t>& data) {
         return false;
     }
 
-    DWORD bytesWritten;
+    DWORD bytes_written;
     return WriteFile(comPort, data.data(), static_cast<DWORD>(data.size()), &bytesWritten, NULL);
 }
 
@@ -85,10 +85,10 @@ std::string SerialWindows::read() {
         return "";
     }
     std::vector<uint8_t> buffer(1024); // Example buffer size
-    unsigned long bytesRead;
+    unsigned long bytes_read;
     ReadFile(comPort, buffer.data(), buffer.size(), &bytesRead, NULL);
-    if(bytesRead > 0) {
-        buffer.resize(bytesRead); // Adjust size to actual bytes read
+    if(bytes_read > 0) {
+        buffer.resize(bytes_read); // Adjust size to actual bytes read
         if (this->callbackPtr) {
             std::string str;
             str.assign(buffer.begin(), buffer.end());
@@ -109,14 +109,14 @@ void SerialWindows::threadFunction() {
     OVERLAPPED ov = { 0 };
     ov.hEvent = CreateEvent(0, true, 0, 0);
     unsigned long reason;
-    std::string stringBuffer;
+    std::string string_buffer;
     while (running) {
         WaitCommEvent(comPort, &reason, &ov);
         if (WaitForSingleObject(ov.hEvent, INFINITE) == WAIT_OBJECT_0) {
             std::vector<uint8_t> buffer(1024); // Example buffer size
-            unsigned long bytesRead;
+            unsigned long bytes_read;
             bool ret = ReadFile(comPort, buffer.data(), buffer.size(), &bytesRead, &ov);
-            if(bytesRead > 0) {
+            if(bytes_read > 0) {
                 for(uint8_t character : buffer) {
                     if(character == '\r') {   
                         if(!(stringBuffer.empty())) { 
