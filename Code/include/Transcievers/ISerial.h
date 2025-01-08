@@ -3,7 +3,7 @@
 #include <vector>
 #include <functional>
 #include "CanMessage.h"
-
+const uint16_t SERIAL_READ_BUFFER_SIZE = 1024;
 class ISerial {
 public:
     virtual ~ISerial() = default; // Virtual destructor

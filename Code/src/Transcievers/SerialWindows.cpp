@@ -84,8 +84,8 @@ std::string SerialWindows::read() {
     if (comPort == INVALID_HANDLE_VALUE) {
         return "";
     }
-    std::vector<uint8_t> buffer(1024); // Example buffer size
-    unsigned long bytes_read;
+    std::vector<uint8_t> buffer(SERIAL_READ_BUFFER_SIZE); // Example buffer size
+    unsigned long bytes_read = 0;
     ReadFile(comPort, buffer.data(), buffer.size(), &bytesRead, NULL);
     if(bytes_read > 0) {
         buffer.resize(bytes_read); // Adjust size to actual bytes read
@@ -108,14 +108,13 @@ void SerialWindows::registerCallback(std::function<void(std::string)> callback) 
 void SerialWindows::threadFunction() {
     OVERLAPPED ov = { 0 };
     ov.hEvent = CreateEvent(0, true, 0, 0);
-    unsigned long reason;
     std::string string_buffer;
-    while (running) {
-        WaitCommEvent(comPort, &reason, &ov);
+    while (this->running) {
+        WaitCommEvent(comPort, NULL, &ov);
         if (WaitForSingleObject(ov.hEvent, INFINITE) == WAIT_OBJECT_0) {
-            std::vector<uint8_t> buffer(1024); // Example buffer size
-            unsigned long bytes_read;
-            bool ret = ReadFile(comPort, buffer.data(), buffer.size(), &bytesRead, &ov);
+            std::vector<uint8_t> buffer(SERIAL_READ_BUFFER_SIZE); // Example buffer size
+            unsigned long bytes_read = 0;
+            ReadFile(comPort, buffer.data(), buffer.size(), &bytesRead, &ov);
             if(bytes_read > 0) {
                 for(uint8_t character : buffer) {
                     if(character == '\r') {   

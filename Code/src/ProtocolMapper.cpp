@@ -1,4 +1,4 @@
-#include <ELM327.h>
+#include <Transcievers/ELM327.h>
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
     #define WINDOWS
 #endif
@@ -6,7 +6,7 @@
 #if WINDOWS
 #include "SerialWindows.h"
 #elif __APPLE__
-#include "SerialMacOS.h"
+#include <Transcievers/SerialMacOS.h>
 #endif
 #include <stdexcept>
 #include <iostream>
@@ -22,18 +22,15 @@ int main() {
     try {
         #if WINDOWS
         auto serial = std::make_unique<SerialWindows>();
+        const std::string port_name = "COM9";
         #elif __APPLE__
         auto serial = std::make_unique<SerialMacOS>();
+        const std::string port_name = "/dev/tty.usbserial-10";
         #endif
         
-        if (!serial->open("COM9")) {
+        if (!serial->open(port_name)) {
             throw std::runtime_error("Failed to open serial port");
         }
-        // serial->registerCallback(serialReceiveCallback);
-        // serial->writeString("ATZ\r");
-        
-        std::vector<uint8_t> buffer(1024); // Example buffer size
-        // serial->read(buffer, buffer.size());
         ELM327 elm327(std::move(serial));
 
         elm327.registerCallback([](const CanMessage& msg) {
@@ -54,7 +51,7 @@ int main() {
         };
 
     } catch (const std::exception& e) {
-        printf("Error: %s\n", e.what());
+        std::cout << "Error: " << e.what() << std::endl;
     }
 
     return 0;

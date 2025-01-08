@@ -1,5 +1,5 @@
 #include "ITransciever.h"
-#include "ISerial.h"
+#include <Transcievers/ISerial.h>
 #include <memory>
 #include <string>
 #include <list>
@@ -18,9 +18,11 @@ class ELM327 : public ITransciever
 
 		void storeMessage(std::string message);
 		bool ready;
+
+		bool sendATMessage(std::string command, bool waitForResponse=true);
 	
 	public:
-		explicit ELM327(std::unique_ptr<ISerial> serial) ;
+		explicit ELM327(std::unique_ptr<ISerial> serial);
 		~ELM327();
 
 		void start() override;
