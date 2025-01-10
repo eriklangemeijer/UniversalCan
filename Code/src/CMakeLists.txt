@@ -1,6 +1,9 @@
 set(UniversalCan_SRC
-    ProtocolMapper.cpp
     Transcievers/ELM327.cpp
+    CanMessage.cpp
+    CanMessageTemplate.cpp
+    CanValueTemplate.cpp
+    ProtocolDefinitionParser.cpp
 )
 if(WIN32)
     list(APPEND UniversalCan_SRC Transcievers/SerialWindows.cpp)
