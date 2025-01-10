@@ -35,7 +35,7 @@ TEST(M01EngSpdResponse, add)
 TEST(M01PIDSupportResponse, add)
 {
     const uint8_t mode1_supp_pid = 0x00;
-    ProtocolDefinitionParser parser = ProtocolDefinitionParser("C:/Users/erikl/Documents/code_projects/UniversalCan/ProtocolDefinitions/J1979.xml");
+    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../../ProtocolDefinitions/J1979.xml");
     std::shared_ptr<CanMessageTemplate> template_ptr = std::make_shared<CanMessageTemplate> (*parser.message_list.begin());
     CanMessage response_supp_pid = CanMessage({mode1_response_id, mode1_supp_pid, 0xBE, 0x1F, 0xA8, 0x13}, template_ptr);
     // From wikipedia table: https://en.wikipedia.org/wiki/OBD-II_PIDs#Service_01_PID_00
