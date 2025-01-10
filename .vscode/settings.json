@@ -77,7 +77,14 @@
         "iomanip": "cpp",
         "span": "cpp",
         "syncstream": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "any": "cpp",
+        "csignal": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "fstream": "cpp",
+        "cinttypes": "cpp"
     },
     "C_Cpp.default.compilerPath": "C:\\msys64\\ucrt64\\bin\\g++.exe",
     "editor.tokenColorCustomizations": {
@@ -105,5 +112,5 @@
     "gtest-adapter.debugConfig": [
         "(lldb) Launch(MacOS)"
     ],
-    "cmake.sourceDirectory": "/Users/eriklangemeijer/code_projects/UniversalCan/Code"
+    "cmake.sourceDirectory": "C:/Users/erikl/Documents/code_projects/UniversalCan/Code"
 }

@@ -2,13 +2,27 @@
 
 #include <stdint.h>
 #include <vector>
+#include <functional>
 #include <string>
+#include <list>
+#include <CanValueTemplate.h>
+#include <pugixml.hpp>
+#include <cstdint>
+#include <cstring>
+#include <stdexcept>
+#include <string>
+
 class CanMessageTemplate
 {
     private:
-
+        std::string name;
+        std::string description;
+        std::list<CanValueTemplate> value_list;
     public:
-        CanMessageTemplate();
-        std::vector<std::string, void*> getValueList(std::vector<uint8_t> can_data);
+        
+        CanMessageTemplate(pugi::xml_node& msg);
+        std::vector<int64_t> parseData(std::vector<uint8_t> can_data);
+
+
 
 };

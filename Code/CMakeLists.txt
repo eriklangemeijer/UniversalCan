@@ -1,20 +1,14 @@
 
 cmake_minimum_required(VERSION 3.9)
+include(FetchContent)
 
 set(CMAKE_CXX_STANDARD 17)
-
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip
-)
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-
 project(UniversalCan VERSION 1.0)
 set(UniversalCan_VERSION 1.0)
 
-include(CTest)
+add_subdirectory(external/googletest)
+add_subdirectory(external/pugixml)
+
 
 # Function to prepend the subdirectory to source files in subdirectories
 FUNCTION(PREPEND var )
@@ -30,9 +24,6 @@ ENDFUNCTION(PREPEND)
 # bin/ and lib/, respectively.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "lib")
-
-# Find LAPACK on the system. This is mostly for demonstration.
-# find_package(LAPACK REQUIRED)
 
 # Include source code and headers. This calls the CMakeLists.txt in each
 # subdirectory. These can define their own libraries, executables, etc. as targets, 
@@ -50,9 +41,7 @@ add_subdirectory(include)
 # stdout with:
 #   ctest -V
 
-if(BUILD_TESTING)
-    add_subdirectory(tests)
-endif()
+add_subdirectory(tests)
 
 # Add the library UniversalCan as a target, with the contents of src/ and include/
 # as dependencies.
@@ -86,12 +75,7 @@ target_include_directories(ProtocolMapper PUBLIC
    $<INSTALL_INTERFACE:include> 
    )
 
-# Specify that UniversalCan requires LAPACK to link properly. Ideally, LAPACK would
-# specify LAPACK::LAPACK for linking so that we can avoid using the variables.
-# However, each package is different and one must check the documentation to 
-# see what variables are defined.
-target_link_libraries(ProtocolMapper ${LAPACK_LIBRARIES})
-
+target_link_libraries(ProtocolMapper PRIVATE pugixml)
 # Write a "version file" in case some wants to only load a particular version of
 # UniversalCan @BUG this fails at the moment.
 include(CMakePackageConfigHelpers)

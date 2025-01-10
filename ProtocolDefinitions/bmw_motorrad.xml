@@ -1,5 +1,5 @@
 <ProtocolDefintion name="BMW Motorrad">
 
-<include>./J1939.json</include>
+<include>./J1979.xml</include>
 
 </ProtocolDefintion>
