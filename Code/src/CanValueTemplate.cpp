@@ -14,12 +14,8 @@ CanValueTemplate::CanValueTemplate(pugi::xml_node template_description)
     value_name = template_description.attribute("name").as_string();
     data_type = template_description.attribute("DataType").as_string();
 
-    std::cout << "Value: " << value_name << ", DataType: " << data_type
-              << std::endl;
-
     auto operations = template_description.child("Operations");
     for (auto operation = operations.first_child(); operation; operation = operation.next_sibling()) {
-        std::cout << "  Operation:" << operation.name() << std::endl;
         if(strcmp(operation.name(), "BYTE_SELECT") == 0 ) {
             int64_t arg1 = operation.attribute("arg1").as_int();
             int64_t arg2 = operation.attribute("arg2").as_int();
