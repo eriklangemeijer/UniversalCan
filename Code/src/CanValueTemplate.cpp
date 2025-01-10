@@ -17,29 +17,41 @@ CanValueTemplate::CanValueTemplate(pugi::xml_node template_description)
     auto operations = template_description.child("Operations");
     for (auto operation = operations.first_child(); operation; operation = operation.next_sibling()) {
         if(strcmp(operation.name(), "BYTE_SELECT") == 0 ) {
-            int64_t arg1 = operation.attribute("arg1").as_int();
-            int64_t arg2 = operation.attribute("arg2").as_int();
+            uint64_t arg1 = operation.attribute("arg1").as_int();
+            uint64_t arg2 = operation.attribute("arg2").as_int();
             func_list.emplace_back(
               [this, arg1, arg2](std::vector<uint8_t> data) {
                 return modifierSelectByte(data, arg1, arg2);
               });
         }
         else if(strcmp(operation.name(), "GAIN") == 0 ) {
-            int64_t arg1 = operation.attribute("arg1").as_int();
+            uint64_t arg1 = operation.attribute("arg1").as_int();
             func_list.emplace_back([this, arg1](std::vector<uint8_t> data) {
               return modifierGain(data, arg1);
             });
         }
         else if(strcmp(operation.name(), "BITWISE_OR") == 0 ) {
-            int64_t arg1 = operation.attribute("arg1").as_int();
+            uint64_t arg1 = operation.attribute("arg1").as_int();
             func_list.emplace_back([this, arg1](std::vector<uint8_t> data) {
               return modifierBitwiseOr(data, arg1);
             });
         }
         else if(strcmp(operation.name(), "BITWISE_AND") == 0 ) {
-            int64_t arg1 = operation.attribute("arg1").as_int();
+            uint64_t arg1 = operation.attribute("arg1").as_int();
             func_list.emplace_back([this, arg1](std::vector<uint8_t> data) {
               return modifierBitwiseAnd(data, arg1);
+            });
+        }
+        else if(strcmp(operation.name(), "BITSHIFT_RIGHT") == 0 ) {
+            uint64_t arg1 = operation.attribute("arg1").as_int();
+            func_list.emplace_back([this, arg1](std::vector<uint8_t> data) {
+              return modifierBitShiftRight(data, arg1);
+            });
+        }
+        else if(strcmp(operation.name(), "BITSHIFT_LEFT") == 0 ) {
+            uint64_t arg1 = operation.attribute("arg1").as_int();
+            func_list.emplace_back([this, arg1](std::vector<uint8_t> data) {
+              return modifierBitShiftLeft(data, arg1);
             });
         }
         else {
@@ -72,74 +84,90 @@ CanValueTemplate::modifierSelectByte(std::vector<uint8_t> data,
 }
 
 std::vector<uint8_t>
-CanValueTemplate::modifierGain(std::vector<uint8_t> data, int64_t B)
+CanValueTemplate::modifierGain(std::vector<uint8_t> data, uint64_t B)
 {
     switch(data.size()){
-        case 1:
-            B *= *((int8_t*)data.data());
+        case sizeof(uint8_t):
+            B *= *((uint8_t*)data.data());
             break;
-        case 2:
-            B *= *((int16_t*)data.data());
+        case sizeof(uint16_t):
+            B *= *((uint16_t*)data.data());
             break;
-        case 4:
-            B *= *((int32_t*)data.data());
+        case sizeof(uint32_t):
+            B *= *((uint32_t*)data.data());
             break;
-        case 8:
-            B *= *((int64_t*)data.data());
+        case sizeof(uint64_t):
+            B *= *((uint64_t*)data.data());
             break;
         default:
             throw std::runtime_error("data must be exactly the size of a default integer type (1,2,4 or 8 bytes)");
         
     }
-    std::memcpy(data.data(), &B, sizeof(B));
+    std::memcpy(data.data(), &B, data.size());
     return data;
 }
 
 std::vector<uint8_t>
-CanValueTemplate::modifierBitwiseOr(std::vector<uint8_t> data, int64_t B)
-{
-    switch(data.size()){
-        case 1:
-            B |= *((int8_t*)data.data());
-            break;
-        case 2:
-            B |= *((int16_t*)data.data());
-            break;
-        case 4:
-            B |= *((int32_t*)data.data());
-            break;
-        case 8:
-            B |= *((int64_t*)data.data());
-            break;
-        default:
-            throw std::runtime_error("data must be exactly the size of a default integer type (1,2,4 or 8 bytes)");
-        
+CanValueTemplate::modifierBitwiseOr(std::vector<uint8_t> data, uint64_t B) {
+    for(uint8_t ii=0; ii < data.size(); ii++) {
+        data[ii] |= *(((uint8_t*)&B));
     }
-    std::memcpy(data.data(), &B, sizeof(B));
     return data;
 }
 
 std::vector<uint8_t>
-CanValueTemplate::modifierBitwiseAnd(std::vector<uint8_t> data, int64_t B)
-{
+CanValueTemplate::modifierBitwiseAnd(std::vector<uint8_t> data, uint64_t B) {
+    for(uint8_t ii=0; ii < data.size(); ii++) {
+        data[ii] &= *(((uint8_t*)&B));
+    }
+    return data;
+}
+
+
+std::vector<uint8_t> CanValueTemplate::modifierBitShiftRight(std::vector<uint8_t> data, uint64_t nr_bits) {
+    uint64_t temp_data;
     switch(data.size()){
-        case 1:
-            B &= *((int8_t*)data.data());
+        case sizeof(uint8_t):
+            temp_data = *((uint8_t*)data.data());
             break;
-        case 2:
-            B &= *((int16_t*)data.data());
+        case sizeof(uint16_t):
+            temp_data = *((uint16_t*)data.data());
             break;
-        case 4:
-            B &= *((int32_t*)data.data());
+        case sizeof(uint32_t):
+            temp_data = *((uint32_t*)data.data());
             break;
-        case 8:
-            B &= *((int64_t*)data.data());
+        case sizeof(uint64_t):
+            temp_data = *((uint64_t*)data.data());
             break;
         default:
             throw std::runtime_error("data must be exactly the size of a default integer type (1,2,4 or 8 bytes)");
         
     }
-    std::memcpy(data.data(), &B, sizeof(B));
+    temp_data >>= nr_bits;
+    std::memcpy(data.data(), &temp_data, data.size());
     return data;
 }
 
+std::vector<uint8_t> CanValueTemplate::modifierBitShiftLeft(std::vector<uint8_t> data, uint64_t nr_bits) {
+    uint64_t temp_data;
+    switch(data.size()){
+        case sizeof(uint8_t):
+            temp_data = *((uint8_t*)data.data());
+            break;
+        case sizeof(uint16_t):
+            temp_data = *((uint16_t*)data.data());
+            break;
+        case sizeof(uint32_t):
+            temp_data = *((uint32_t*)data.data());
+            break;
+        case sizeof(uint64_t):
+            temp_data = *((uint64_t*)data.data());
+            break;
+        default:
+            throw std::runtime_error("data must be exactly the size of a default integer type (1,2,4 or 8 bytes)");
+        
+    }
+    temp_data <<= nr_bits;
+    std::memcpy(data.data(), &temp_data, data.size());
+    return data;
+}

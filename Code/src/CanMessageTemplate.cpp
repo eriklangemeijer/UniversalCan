@@ -1,5 +1,5 @@
 #include <CanMessageTemplate.h>
-
+#include <cstdint>
 
 CanMessageTemplate::CanMessageTemplate(pugi::xml_node& msg) {
     name = msg.attribute("Name").as_string();
@@ -17,17 +17,17 @@ CanMessageTemplate::parseData(std::vector<uint8_t> can_data)
     for(auto value : this->value_list) {
         std::vector<uint8_t> parsed_value = value.parseData(can_data);
         switch(parsed_value.size()){
-            case 1:
-                values[ii] = *((int8_t*)parsed_value.data());
+            case sizeof(uint8_t):
+                values[ii] = *((uint8_t*)parsed_value.data());
                 break;
-            case 2:
-                values[ii] = *((int16_t*)parsed_value.data());
+            case sizeof(uint16_t):
+                values[ii] = *((uint16_t*)parsed_value.data());
                 break;
-            case 4:
-                values[ii] = *((int32_t*)parsed_value.data());
+            case sizeof(uint32_t):
+                values[ii] = *((uint32_t*)parsed_value.data());
                 break;
-            case 8:
-                values[ii] = *((int64_t*)parsed_value.data());
+            case sizeof(uint64_t):
+                values[ii] = *((uint64_t*)parsed_value.data());
                 break;
             default:
                 throw std::runtime_error("data must be exactly the size of a default integer type (1,2,4 or 8 bytes).");
