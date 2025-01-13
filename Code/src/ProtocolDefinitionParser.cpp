@@ -70,5 +70,5 @@ bool ProtocolDefinitionParser::fileExists(const std::string& path) {
 }
 
 std::list<CanMessageTemplate> ProtocolDefinitionParser::getMessageList() {
-    return getMessageList;
+    return message_list;
 }

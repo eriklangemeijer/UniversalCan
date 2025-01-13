@@ -80,25 +80,25 @@ std::vector<uint8_t> CanValueTemplate::modifierSelectByte(std::vector<uint8_t> d
 
 
 template<typename T, typename Op>
-std::vector<uint8_t> CanValueTemplate::applyOperation(std::vector<uint8_t> data, T B, Op op) {
+std::vector<uint8_t> CanValueTemplate::applyOperation(std::vector<uint8_t> data, T B, Op operation) {
     T value = convertDataToType<T>(data);
-    value = op(value, static_cast<T>(B));  // Apply the bitwise operation using the passed operation
+    value = operation(value, static_cast<T>(B));  // Apply the bitwise operation using the passed operation
     copyTypeToData(value, data);
     return data;
 }
 
 template<typename Op>
-std::vector<uint8_t> CanValueTemplate::callOperationForDatatype(std::vector<uint8_t> data, uint64_t B, Op op)
+std::vector<uint8_t> CanValueTemplate::callOperationForDatatype(std::vector<uint8_t> data, uint64_t B, Op operation)
 {
     switch (data.size()) {
         case sizeof(uint8_t):
-            return applyOperation<uint8_t>(data, (uint8_t)B, op);
+            return applyOperation<uint8_t>(data, (uint8_t)B, operation);
         case sizeof(uint16_t):
-            return applyOperation<uint16_t>(data, (uint16_t)B, op);
+            return applyOperation<uint16_t>(data, (uint16_t)B, operation);
         case sizeof(uint32_t):
-            return applyOperation<uint32_t>(data, (uint32_t)B, op);
+            return applyOperation<uint32_t>(data, (uint32_t)B, operation);
         case sizeof(uint64_t):
-            return applyOperation<uint64_t>(data, (uint64_t)B, op);
+            return applyOperation<uint64_t>(data, (uint64_t)B, operation);
         default:
             throw std::runtime_error("data must be exactly the size of a default integer type (1,2,4 or 8 bytes)");
     }
