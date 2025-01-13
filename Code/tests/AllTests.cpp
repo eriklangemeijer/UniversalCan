@@ -49,6 +49,13 @@ TEST(M01PIDSupportResponse, add)
     }
     
 }
+
+TEST(IncludeRelativeFile, add)
+{
+    const uint8_t mode1_supp_pid = 0x00;
+    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../../ProtocolDefinitions/bmw_motorrad.xml");    
+}
+
 int main(int argc, char* argv[])
 {
     ::testing::InitGoogleTest(&argc, argv);

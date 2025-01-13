@@ -1,8 +1,9 @@
 #include <ProtocolDefinitionParser.h>
-#include <filesystem> // For file path manipulation
-#include <stdexcept>  // For runtime_error
-
-namespace fs = std::filesystem;
+#include <stdexcept> // For runtime_error
+#include <sstream>   // For stringstream
+#include <fstream>   // For file I/O
+#include <cstdlib>   // For getenv
+#include <vector>    // For path manipulation
 
 ProtocolDefinitionParser::ProtocolDefinitionParser(std::string filename) {
     pugi::xml_document doc;
@@ -10,22 +11,58 @@ ProtocolDefinitionParser::ProtocolDefinitionParser(std::string filename) {
     if (!result)
         throw std::runtime_error("Cannot open protocol file");
 
-
     for (auto message = doc.child("ProtocolDefintion").child("Message"); message; message = message.next_sibling("Message")) {
         message_list.emplace_back(CanMessageTemplate(message));
     }
-    fs::path base_path = fs::absolute(fs::path(filename)).parent_path();
+
+    std::string base_path = get_parent_path(canonicalize_path(filename));
 
     for (auto included_document = doc.child("ProtocolDefintion").child("include"); included_document; included_document = included_document.next_sibling("include")) {
         std::string relative_path = included_document.attribute("path").as_string();
 
-        fs::path absolute_path = base_path / relative_path;
-        absolute_path = fs::absolute(absolute_path);
+        std::string absolute_path = combine_paths(base_path, relative_path);
 
-        if (!fs::exists(absolute_path)) {
-            throw std::runtime_error("Included file does not exist: " + absolute_path.string());
+        if (!file_exists(absolute_path)) {
+            throw std::runtime_error("Included file does not exist: " + absolute_path);
         }
-        ProtocolDefinitionParser parent_protocol = ProtocolDefinitionParser(absolute_path.string());
-        // message_list.splice(message_list.end(), parent_protocol.message_list);
+        auto parent_list = ProtocolDefinitionParser(absolute_path).message_list;
+        message_list.insert(message_list.end(), parent_list.begin(), parent_list.end());
     }
+}
+
+std::string ProtocolDefinitionParser::canonicalize_path(const std::string& path) {
+    char resolved_path[4096];
+#ifdef _WIN32
+    if (_fullpath(resolved_path, path.c_str(), sizeof(resolved_path)) == nullptr) {
+        throw std::runtime_error("Failed to resolve path: " + path);
+    }
+#else
+    if (realpath(path.c_str(), resolved_path) == nullptr) {
+        throw std::runtime_error("Failed to resolve path: " + path);
+    }
+#endif
+    return std::string(resolved_path);
+}
+
+std::string ProtocolDefinitionParser::get_parent_path(const std::string& path) {
+    size_t last_slash = path.find_last_of("/\\");
+    if (last_slash == std::string::npos) {
+        return "";
+    }
+    return path.substr(0, last_slash);
+}
+
+std::string ProtocolDefinitionParser::combine_paths(const std::string& base, const std::string& relative) {
+    if (relative.empty()) {
+        return base;
+    }
+    if (relative[0] == '/' || relative[0] == '\\') {
+        return relative; // Already an absolute path
+    }
+    return base + "/" + relative;
+}
+
+bool ProtocolDefinitionParser::file_exists(const std::string& path) {
+    std::ifstream file(path);
+    return file.good();
 }
