@@ -47,25 +47,25 @@ CanValueTemplate::CanValueTemplate(pugi::xml_node template_description)
         else if(strcmp(operation.name(), "BITWISE_OR") == 0 ) {
             uint64_t arg1 = operation.attribute("arg1").as_int();
             func_list.emplace_back([this, arg1](std::vector<uint8_t> data) {
-              return modifierBitwiseOr(data, arg1);
+              return modifierBitwise(data, arg1, std::bit_or<>());
             });
         }
         else if(strcmp(operation.name(), "BITWISE_AND") == 0 ) {
             uint64_t arg1 = operation.attribute("arg1").as_int();
             func_list.emplace_back([this, arg1](std::vector<uint8_t> data) {
-              return modifierBitwiseAnd(data, arg1);
+              return modifierBitwise(data, arg1, std::bit_and<>());
             });
         }
         else if(strcmp(operation.name(), "BITSHIFT_RIGHT") == 0 ) {
             uint64_t arg1 = operation.attribute("arg1").as_int();
             func_list.emplace_back([this, arg1](std::vector<uint8_t> data) {
-              return modifierBitShiftRight(data, arg1);
+              return modifierBitShift(data, arg1, false);
             });
         }
         else if(strcmp(operation.name(), "BITSHIFT_LEFT") == 0 ) {
             uint64_t arg1 = operation.attribute("arg1").as_int();
             func_list.emplace_back([this, arg1](std::vector<uint8_t> data) {
-              return modifierBitShiftLeft(data, arg1);
+              return modifierBitShift(data, arg1, true);
             });
         }
         else {
@@ -114,45 +114,27 @@ std::vector<uint8_t> CanValueTemplate::modifierGain(std::vector<uint8_t> data, u
     }
 }
 
-template<typename T>
-std::vector<uint8_t> CanValueTemplate::applyBitwiseOperation(std::vector<uint8_t> data, uint64_t B, bool isOr) {
+
+template<typename T, typename Op>
+std::vector<uint8_t> CanValueTemplate::applyBitwiseOperation(std::vector<uint8_t> data, T B, Op op) {
     T value = convertDataToType<T>(data);
-    if (isOr) {
-        value |= static_cast<T>(B);
-    } else {
-        value &= static_cast<T>(B);
-    }
+    value = op(value, static_cast<T>(B));  // Apply the bitwise operation using the passed operation
     copyTypeToData(value, data);
     return data;
 }
 
-std::vector<uint8_t> CanValueTemplate::modifierBitwiseOr(std::vector<uint8_t> data, uint64_t B)
+template<typename Op>
+std::vector<uint8_t> CanValueTemplate::modifierBitwise(std::vector<uint8_t> data, uint64_t B, Op op)
 {
     switch (data.size()) {
         case sizeof(uint8_t):
-            return applyBitwiseOperation<uint8_t>(data, B, true);
+            return applyBitwiseOperation<uint8_t>(data, (uint8_t)B, op);
         case sizeof(uint16_t):
-            return applyBitwiseOperation<uint16_t>(data, B, true);
+            return applyBitwiseOperation<uint16_t>(data, (uint16_t)B, op);
         case sizeof(uint32_t):
-            return applyBitwiseOperation<uint32_t>(data, B, true);
+            return applyBitwiseOperation<uint32_t>(data, (uint32_t)B, op);
         case sizeof(uint64_t):
-            return applyBitwiseOperation<uint64_t>(data, B, true);
-        default:
-            throw std::runtime_error("data must be exactly the size of a default integer type (1,2,4 or 8 bytes)");
-    }
-}
-
-std::vector<uint8_t> CanValueTemplate::modifierBitwiseAnd(std::vector<uint8_t> data, uint64_t B)
-{
-    switch (data.size()) {
-        case sizeof(uint8_t):
-            return applyBitwiseOperation<uint8_t>(data, B, false);
-        case sizeof(uint16_t):
-            return applyBitwiseOperation<uint16_t>(data, B, false);
-        case sizeof(uint32_t):
-            return applyBitwiseOperation<uint32_t>(data, B, false);
-        case sizeof(uint64_t):
-            return applyBitwiseOperation<uint64_t>(data, B, false);
+            return applyBitwiseOperation<uint64_t>(data, (uint64_t)B, op);
         default:
             throw std::runtime_error("data must be exactly the size of a default integer type (1,2,4 or 8 bytes)");
     }
@@ -170,34 +152,19 @@ std::vector<uint8_t> CanValueTemplate::applyBitShift(std::vector<uint8_t> data, 
     return data;
 }
 
-std::vector<uint8_t> CanValueTemplate::modifierBitShiftRight(std::vector<uint8_t> data, uint64_t nr_bits)
+std::vector<uint8_t> CanValueTemplate::modifierBitShift(std::vector<uint8_t> data, uint64_t nr_bits, bool isLeftShift)
 {
     switch (data.size()) {
         case sizeof(uint8_t):
-            return applyBitShift<uint8_t>(data, nr_bits, false);
+            return applyBitShift<uint8_t>(data, nr_bits, isLeftShift);
         case sizeof(uint16_t):
-            return applyBitShift<uint16_t>(data, nr_bits, false);
+            return applyBitShift<uint16_t>(data, nr_bits, isLeftShift);
         case sizeof(uint32_t):
-            return applyBitShift<uint32_t>(data, nr_bits, false);
+            return applyBitShift<uint32_t>(data, nr_bits, isLeftShift);
         case sizeof(uint64_t):
-            return applyBitShift<uint64_t>(data, nr_bits, false);
+            return applyBitShift<uint64_t>(data, nr_bits, isLeftShift);
         default:
             throw std::runtime_error("data must be exactly the size of a default integer type (1,2,4 or 8 bytes)");
     }
 }
 
-std::vector<uint8_t> CanValueTemplate::modifierBitShiftLeft(std::vector<uint8_t> data, uint64_t nr_bits)
-{
-    switch (data.size()) {
-        case sizeof(uint8_t):
-            return applyBitShift<uint8_t>(data, nr_bits, true);
-        case sizeof(uint16_t):
-            return applyBitShift<uint16_t>(data, nr_bits, true);
-        case sizeof(uint32_t):
-            return applyBitShift<uint32_t>(data, nr_bits, true);
-        case sizeof(uint64_t):
-            return applyBitShift<uint64_t>(data, nr_bits, true);
-        default:
-            throw std::runtime_error("data must be exactly the size of a default integer type (1,2,4 or 8 bytes)");
-    }
-}
