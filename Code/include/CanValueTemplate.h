@@ -12,6 +12,10 @@ class CanValueTemplate
         std::string value_name;
         std::string data_type ;
         std::list<std::function<std::vector<uint8_t>(std::vector<uint8_t> data)>> func_list;
+
+        template<typename T> std::vector<uint8_t> applyGain(std::vector<uint8_t> data, uint64_t B);
+        template<typename T> std::vector<uint8_t> applyBitShift(std::vector<uint8_t> data, uint64_t nr_bits, bool isLeftShift);
+        template<typename T> std::vector<uint8_t> applyBitwiseOperation(std::vector<uint8_t> data, uint64_t B, bool isOr);
     public:
         
         CanValueTemplate(pugi::xml_node template_description);
