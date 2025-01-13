@@ -1,9 +1,11 @@
+#include "CanMessageTemplate.h"
+#include "CanValueTemplate.h"
 #include <ProtocolDefinitionParser.h>
-#include <stdexcept> // For runtime_error
-#include <sstream>   // For stringstream
-#include <fstream>   // For file I/O
-#include <cstdlib>   // For getenv
-#include <vector>    // For path manipulation
+#include <_stdlib.h>
+#include <cstdlib>
+#include <fstream>
+#include <stdexcept>
+#include <vector>
 
 ProtocolDefinitionParser::ProtocolDefinitionParser(std::string filename) {
     pugi::xml_document doc;
@@ -15,14 +17,14 @@ ProtocolDefinitionParser::ProtocolDefinitionParser(std::string filename) {
         message_list.emplace_back(CanMessageTemplate(message));
     }
 
-    std::string base_path = get_parent_path(canonicalize_path(filename));
+    std::string base_path = getParentPath(canonicalizePath(filename));
 
     for (auto included_document = doc.child("ProtocolDefintion").child("include"); included_document; included_document = included_document.next_sibling("include")) {
         std::string relative_path = included_document.attribute("path").as_string();
 
-        std::string absolute_path = combine_paths(base_path, relative_path);
+        std::string absolute_path = combinePaths(base_path, relative_path);
 
-        if (!file_exists(absolute_path)) {
+        if (!fileExists(absolute_path)) {
             throw std::runtime_error("Included file does not exist: " + absolute_path);
         }
         auto parent_list = ProtocolDefinitionParser(absolute_path).message_list;
@@ -30,7 +32,7 @@ ProtocolDefinitionParser::ProtocolDefinitionParser(std::string filename) {
     }
 }
 
-std::string ProtocolDefinitionParser::canonicalize_path(const std::string& path) {
+std::string ProtocolDefinitionParser::canonicalizePath(const std::string& path) {
     char resolved_path[4096];
 #ifdef _WIN32
     if (_fullpath(resolved_path, path.c_str(), sizeof(resolved_path)) == nullptr) {
@@ -44,7 +46,7 @@ std::string ProtocolDefinitionParser::canonicalize_path(const std::string& path)
     return std::string(resolved_path);
 }
 
-std::string ProtocolDefinitionParser::get_parent_path(const std::string& path) {
+std::string ProtocolDefinitionParser::getParentPath(const std::string& path) {
     size_t last_slash = path.find_last_of("/\\");
     if (last_slash == std::string::npos) {
         return "";
@@ -52,17 +54,21 @@ std::string ProtocolDefinitionParser::get_parent_path(const std::string& path) {
     return path.substr(0, last_slash);
 }
 
-std::string ProtocolDefinitionParser::combine_paths(const std::string& base, const std::string& relative) {
+std::string ProtocolDefinitionParser::combinePaths(const std::string& base, const std::string& relative) {
     if (relative.empty()) {
         return base;
     }
-    if (relative[0] == '/' || relative[0] == '\\') {
-        return relative; // Already an absolute path
+    if (relative[0] != '.') {
+        throw std::runtime_error("Include path is not a relative path. Please start the path name with ./");
     }
     return base + "/" + relative;
 }
 
-bool ProtocolDefinitionParser::file_exists(const std::string& path) {
+bool ProtocolDefinitionParser::fileExists(const std::string& path) {
     std::ifstream file(path);
     return file.good();
+}
+
+std::list<CanMessageTemplate> ProtocolDefinitionParser::getMessageList() {
+    return getMessageList;
 }
