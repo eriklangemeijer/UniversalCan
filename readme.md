@@ -6,13 +6,14 @@ UniversalCan is a tool for communicating CAN messages using a configurable messa
 
 Modern vehicles often require reading and transmitting CAN messages for troubleshooting or configuration. While many programs exist for standard protocols across platforms (Windows, Android, iOS), most vehicles also rely on proprietary manufacturer-specific messages.
 
-Third-party tools address these needs but come with challenges:
+Third-party tools address these needs but often come with challenges:
 
-- High costs and limited developer support for updates and bug fixes.
-- Platform restrictions (e.g., Android-only apps).
+- High costs 
+- Limited developer support for updates and bug fixes.
 - Developers often lack access to all vehicle models to ensure compatibility.
+- Platform restrictions (e.g., Android-only apps).
 
-On the other hand, hobbyists with access to vehicles may analyze protocols but often lack the time or skills to develop comprehensive communication software. This results in redundant effort as each vehicle-specific tool reinvents the wheel.
+On the other hand, hobbyists with access to vehicles may analyze protocols but often lack the time or skills to develop comprehensive communication software. When they do make such a program it results in redundant effort as each vehicle-specific tool reinvents the wheel.
 
 ## Goal
 
