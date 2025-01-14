@@ -5,19 +5,8 @@ const uint8_t max_value_size = 8;
 
 ModifierFunction::ModifierFunction(pugi::xml_node operation) {
     name = operation.name();
-    if(arguments.size() > 0) {
-        std::cout << name<<": Too many\n";
-
-    }
     for (auto value = operation.first_child(); value; value = value.next_sibling()) {
         arguments.emplace_back(value);
-    }
-    if(strcmp(operation.name(), "CONSTANT") != 0 && arguments.size() <=1) {
-        std::cout << name<<": not enough arguments\n";
-    }
-    else if(arguments.size() > 2) {
-        std::cout << name<<": Too many\n";
-
     }
     if(strcmp(operation.name(), "BYTE_SELECT") == 0 ) {
         function = ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
