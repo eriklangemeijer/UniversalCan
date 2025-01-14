@@ -2,20 +2,52 @@
 #include <cstdint>
 #include <cstring>
 #include <functional>
-#include <stdexcept>
-#include <vector>
 #include <iostream>
+#include <regex>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 const uint8_t max_value_size = 8;
+
+ModifierFunction::ModifierFunction(pugi::xml_attribute attribute) {
+    int const const_value = attribute.as_int();
+    function = ([this, const_value](std::vector<uint8_t>,
+                                    std::vector<ModifierFunction>) {
+       std::vector<uint8_t> value = std::vector<uint8_t>(sizeof(const_value));
+       copyTypeToData(const_value, value);
+       return value;
+    });
+}
 
 ModifierFunction::ModifierFunction(pugi::xml_node operation)
   : name(operation.name())
 {
 
-  for (auto value = operation.first_child(); value;
-    value = value.next_sibling()) {
-    arguments.emplace_back(value);
+  for (auto argument = operation.first_child(); argument;
+    argument = argument.next_sibling()) {
+    arguments.emplace_back(argument);
   }
+
+  std::regex pattern(R"(arg(\d+))");
+  for (pugi::xml_attribute attr : operation.attributes()) {
+
+    std::smatch match;
+    std::string attr_name = attr.name();
+    if (std::regex_match(attr_name, match, pattern)) {
+        int index = std::stoi(match[1].str());
+        if(index >= 1){
+            arguments.insert(arguments.begin() + index-1, attr);
+        }
+        else {
+            std::cout << "Invalid argument number " << index << std::endl;
+        }
+              
+    }
+  }
+  
+  
+
   if (strcmp(operation.name(), "BYTE_SELECT") == 0) {
     function =
       ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
