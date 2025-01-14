@@ -16,15 +16,26 @@ TEST(M01EngSpdResponse, add)
 {
     const uint8_t mode1_veh_spd_id = 0x0D;
     std::string const mode1_veh_spd_template_str =
-      "<Message Name=\"M01VehicleSpeed\" Description=\"Mode $01 response for VehicleSpeed\">\
-                                                <Values>\
-                                                    <Value name=\"VehicleSpeed\" DataType=\"uint8\">\
-                                                        <Operations> \
-                                                            <BYTE_SELECT arg1=\"2\" arg2=\"3\"/>\
-                                                        </Operations>\
-                                                    </Value>\
-                                                </Values>\
-                                            </Message>";
+            "<Message Name=\"M01VehicleSpeed\" Description=\"Mode $01 response for VehicleSpeed\">\
+                    <FILTER_FUNCTION name=\"filter\" DataType=\"bool\" Unit=\"flag\">\
+                        <LOGICAL_AND>\
+                            <INT_COMPARE_CONST arg1=\"0x41\">\
+                                <BYTE_SELECT arg1=\"0\" arg2=\"1\" />\
+                            </INT_COMPARE_CONST>\
+                            <INT_COMPARE_CONST arg1=\"0x0D\">\
+                                <BYTE_SELECT arg1=\"1\" arg2=\"2\" />\
+                            </INT_COMPARE_CONST>\
+                        </LOGICAL_AND>\
+                    </FILTER_FUNCTION>\
+                    <Values>\
+                        <Value name=\"VehicleSpeed\" DataType=\"uint8\" Unit=\"kph\">\
+                            <BYTE_SELECT>\
+                                <CONSTANT value=\"2\"/>\
+                                <CONSTANT value=\"3\"/>\
+                            </BYTE_SELECT>\
+                        </Value>\
+                    </Values>\
+            </Message>";
 
     pugi::xml_document doc;
     pugi::xml_parse_result const result =
