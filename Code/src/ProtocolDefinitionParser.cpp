@@ -2,11 +2,13 @@
 #include "CanValueTemplate.h"
 #include <ProtocolDefinitionParser.h>
 #include <_stdlib.h>
+#include <cstdint>
 #include <cstdlib>
 #include <fstream>
 #include <list>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 ProtocolDefinitionParser::ProtocolDefinitionParser(std::string filename) {
     pugi::xml_document doc;
@@ -74,4 +76,13 @@ bool ProtocolDefinitionParser::fileExists(const std::string& path) {
 
 std::list<CanMessageTemplate> ProtocolDefinitionParser::getMessageList() {
     return message_list;
+}
+
+CanMessageTemplate& ProtocolDefinitionParser::findMatch(std::vector<uint8_t> can_data) {
+    for (auto& message : this->message_list) {
+        if (message.isMatch(can_data)) {
+            return message; // Return a reference to the matching message
+        }
+    }
+    throw std::runtime_error("Template not found");
 }

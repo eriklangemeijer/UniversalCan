@@ -1,4 +1,8 @@
+#include "CanMessageTemplate.h"
 #include <CanMessage.h>
+#include <cstdint>
+#include <memory>
+#include <vector>
 
 CanMessage::CanMessage(std::vector<uint8_t> data,
                        std::shared_ptr<CanMessageTemplate> msg_template,

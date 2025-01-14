@@ -3,28 +3,37 @@
 #include <CanMessageTemplate.h>
 #include <ProtocolDefinitionParser.h>
 #include <cstdint>
+#include <cstring>
 #include <gtest/gtest.h>
 #include <memory>
 #include <string>
 #include <vector>
 
+const uint8_t mode1_veh_spd_id = 0x0D;
 const uint8_t mode1_response_id = 0x41;
 /* Mode 1 messages can be used to request live data. 
    This test verifies how responses to these messages are parsed by the template
    In this test vehicle speed response is checked which is stored directly in the message in kph */
 TEST(M01EngSpdResponse, add)
 {
-    const uint8_t mode1_veh_spd_id = 0x0D;
     std::string const mode1_veh_spd_template_str =
             "<Message Name=\"M01VehicleSpeed\" Description=\"Mode $01 response for VehicleSpeed\">\
                     <FILTER_FUNCTION name=\"filter\" DataType=\"bool\" Unit=\"flag\">\
                         <LOGICAL_AND>\
-                            <INT_COMPARE_CONST arg1=\"0x41\">\
-                                <BYTE_SELECT arg1=\"0\" arg2=\"1\" />\
-                            </INT_COMPARE_CONST>\
-                            <INT_COMPARE_CONST arg1=\"0x0D\">\
-                                <BYTE_SELECT arg1=\"1\" arg2=\"2\" />\
-                            </INT_COMPARE_CONST>\
+                            <INT_COMPARE>\
+                                <BYTE_SELECT>\
+                                        <CONSTANT value=\"0\"/>\
+                                        <CONSTANT value=\"1\"/>\
+                                    </BYTE_SELECT>\
+                                <CONSTANT value=\"0x41\"/>\
+                            </INT_COMPARE>\
+                            <INT_COMPARE>\
+                                <BYTE_SELECT>\
+                                        <CONSTANT value=\"1\"/>\
+                                        <CONSTANT value=\"2\"/>\
+                                    </BYTE_SELECT>\
+                                <CONSTANT value=\"0x0D\"/>\
+                            </INT_COMPARE>\
                         </LOGICAL_AND>\
                     </FILTER_FUNCTION>\
                     <Values>\
@@ -50,6 +59,7 @@ TEST(M01EngSpdResponse, add)
     CanMessage response_120kph = CanMessage({mode1_response_id, mode1_veh_spd_id, 120}, mode1_veh_spd_template);
     GTEST_ASSERT_EQ(response_120kph.values[0], 120);
 }
+
 TEST(M01PIDSupportResponse, add)
 {
     const uint8_t mode1_supp_pid = 0x00;
@@ -73,7 +83,16 @@ TEST(IncludeRelativeFile, add)
 {
     const uint8_t mode1_supp_pid = 0x00;
     ProtocolDefinitionParser const parser =
-      ProtocolDefinitionParser("../../../ProtocolDefinitions/bmw_motorrad.xml");
+                        ProtocolDefinitionParser("../../../ProtocolDefinitions/bmw_motorrad.xml");
+}
+
+TEST(findTemplate, add)
+{
+    ProtocolDefinitionParser parser =
+                        ProtocolDefinitionParser("../../../ProtocolDefinitions/J1979.xml");
+    std::vector<uint8_t> msg_data = {mode1_response_id, mode1_veh_spd_id, 0};
+    auto msg_template = parser.findMatch(msg_data);
+    GTEST_ASSERT_TRUE(strcmp(msg_template.getName().c_str(), "M01VehicleSpeed") == 0);
 }
 
 int main(int argc, char* argv[])

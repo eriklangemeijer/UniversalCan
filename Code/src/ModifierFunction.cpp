@@ -1,79 +1,98 @@
 #include <ModifierFunction.h>
+#include <cstdint>
 #include <cstring>
+#include <functional>
+#include <stdexcept>
+#include <vector>
 #include <iostream>
+
 const uint8_t max_value_size = 8;
 
-ModifierFunction::ModifierFunction(pugi::xml_node operation) {
-    name = operation.name();
-    for (auto value = operation.first_child(); value; value = value.next_sibling()) {
-        arguments.emplace_back(value);
-    }
-    if(strcmp(operation.name(), "BYTE_SELECT") == 0 ) {
-        function = ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
+ModifierFunction::ModifierFunction(pugi::xml_node operation)
+  : name(operation.name())
+{
+
+  for (auto value = operation.first_child(); value;
+    value = value.next_sibling()) {
+    arguments.emplace_back(value);
+  }
+  if (strcmp(operation.name(), "BYTE_SELECT") == 0) {
+    function =
+      ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
         return modifierSelectByte(data, args);
-        });
-    }
-    else if(strcmp(operation.name(), "GAIN") == 0 ) {
-        function = ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
+      });
+  } 
+  else if (strcmp(operation.name(), "GAIN") == 0) {
+    function =
+      ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
         return callOperationForDatatype(data, args, std::multiplies<>());
-        });
-    }
-    else if(strcmp(operation.name(), "BITWISE_OR") == 0 ) {
-        function = ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
+      });
+  } 
+  else if (strcmp(operation.name(), "BITWISE_OR") == 0) {
+    function =
+      ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
         return callOperationForDatatype(data, args, std::bit_or<>());
-        });
-    }
-    else if(strcmp(operation.name(), "BITWISE_AND") == 0 ) {
-        function = ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
+      });
+  } 
+  else if (strcmp(operation.name(), "BITWISE_AND") == 0) {
+    function =
+      ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
         return callOperationForDatatype(data, args, std::bit_and<>());
-        });
-    }
-    else if(strcmp(operation.name(), "BITSHIFT_RIGHT") == 0 ) {
-        function = ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
-            return modifierBitShift(data, args, false);
-        });
-    }
-    else if(strcmp(operation.name(), "BITSHIFT_LEFT") == 0 ) {
-        function = ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
+      });
+  } 
+  else if (strcmp(operation.name(), "BITSHIFT_RIGHT") == 0) {
+    function =
+      ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
+        return modifierBitShift(data, args, false);
+      });
+  } 
+  else if (strcmp(operation.name(), "BITSHIFT_LEFT") == 0) {
+    function =
+      ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
         return modifierBitShift(data, args, true);
-        });
-    }
-    else if(strcmp(operation.name(), "CONSTANT") == 0 ) {
-        int const const_value = operation.attribute("value").as_int();
-        function = ([this, const_value](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
-            std::vector<uint8_t> value = std::vector<uint8_t>(sizeof(const_value));
-            copyTypeToData(const_value, value);
-            return value;
-        });
-    }
-    else {
-        int const const_value = 0;
-        function = ([this, const_value](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
-            std::vector<uint8_t> value = std::vector<uint8_t>(sizeof(const_value));
-            copyTypeToData(const_value, value);
-            return value;
-        });
-    }
+      });
+  } 
+  else if (strcmp(operation.name(), "INT_COMPARE") == 0) {
+    function =
+      ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
+        return callOperationForDatatype(data, args, std::equal_to<>());
+      });
+  } 
+  else if (strcmp(operation.name(), "LOGICAL_AND") == 0) {
+    function =
+      ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
+        return callOperationForDatatype(data, args, std::logical_and<>());
+      });
+  } 
+  else if (strcmp(operation.name(), "CONSTANT") == 0) {
+    int const const_value = operation.attribute("value").as_int();
+    function = ([this, const_value](std::vector<uint8_t>,
+                                    std::vector<ModifierFunction>) {
+      std::vector<uint8_t> value = std::vector<uint8_t>(sizeof(const_value));
+      copyTypeToData(const_value, value);
+      return value;
+    });
+    
+  } 
+  else {
+    std::cout << "Unsupported function " << operation.name() << std::endl;
+  }
 }
-
-
 
 std::vector<uint8_t> ModifierFunction::modifierSelectByte(std::vector<uint8_t> data, std::vector<ModifierFunction> args)
 {
-    uint16_t byte_start = convertDataToType<uint16_t>(args[0].call(data));
-    uint16_t byte_end = convertDataToType<uint16_t>(args[1].call(data));
-    if(byte_start > byte_end || (byte_end - byte_start) > max_value_size) {
-        throw std::runtime_error("byte_start must be smaller than byte_end");
+  auto const byte_start = convertDataToType<uint16_t>(args[0].call(data));
+  auto const byte_end = convertDataToType<uint16_t>(args[1].call(data));
+  if (byte_start > byte_end || (byte_end - byte_start) > max_value_size) {
+    throw std::runtime_error("byte_start must be smaller than byte_end");
     }
     return { data.begin() + byte_start, data.begin() + byte_end };
 }
 
-
-
 template<typename T, typename Op>
-std::vector<uint8_t> ModifierFunction::applyOperation(std::vector<uint8_t> data, T B, Op operation) {
+std::vector<uint8_t> ModifierFunction::applyOperation(std::vector<uint8_t> data, T argument1, Op operation) {
     T value = convertDataToType<T>(data);
-    value = operation(value, static_cast<T>(B));  // Apply the bitwise operation using the passed operation
+    value = operation(value, static_cast<T>(argument1));  // Apply the bitwise operation using the passed operation
     copyTypeToData(value, data);
     return data;
 }
@@ -82,20 +101,21 @@ template<typename Op>
 std::vector<uint8_t> ModifierFunction::callOperationForDatatype(std::vector<uint8_t> data, std::vector<ModifierFunction> args, Op operation)
 {
 
-    std::vector<uint8_t> A = args[0].call(data);
-    uint16_t B = convertDataToType<uint16_t>(args[1].call(data));
-    switch (A.size()) {
-        case sizeof(uint8_t):
-            return applyOperation<uint8_t>(A, (uint8_t)B, operation);
-        case sizeof(uint16_t):
-            return applyOperation<uint16_t>(A, (uint16_t)B, operation);
-        case sizeof(uint32_t):
-            return applyOperation<uint32_t>(A, (uint32_t)B, operation);
-        case sizeof(uint64_t):
-            return applyOperation<uint64_t>(A, (uint64_t)B, operation);
-        default:
-            throw std::runtime_error("data must be exactly the size of a default integer type (1,2,4 or 8 bytes)");
-    }
+  std::vector<uint8_t> const input_value = args[0].call(data);
+  auto const argument1 = convertDataToType<uint16_t>(args[1].call(data));
+  switch (input_value.size()) {
+    case sizeof(uint8_t):
+      return applyOperation<uint8_t>(input_value, (uint8_t)argument1, operation);
+    case sizeof(uint16_t):
+      return applyOperation<uint16_t>(input_value, (uint16_t)argument1, operation);
+    case sizeof(uint32_t):
+      return applyOperation<uint32_t>(input_value, (uint32_t)argument1, operation);
+    case sizeof(uint64_t):
+      return applyOperation<uint64_t>(input_value, (uint64_t)argument1, operation);
+    default:
+      throw std::runtime_error("data must be exactly the size of a default "
+                               "integer type (1,2,4 or 8 bytes)");
+  }
 }
 
 template<typename T>
@@ -113,27 +133,25 @@ std::vector<uint8_t> ModifierFunction::applyBitShift(std::vector<uint8_t> data, 
 std::vector<uint8_t> ModifierFunction::modifierBitShift(std::vector<uint8_t> data, std::vector<ModifierFunction> args, bool isLeftShift)
 {
 
-    std::vector<uint8_t>  value_to_shift = args[0].call(data);
-    uint16_t nr_bits = convertDataToType<uint16_t>(args[1].call(data));
-    switch (value_to_shift.size()) {
-        case sizeof(uint8_t):
-            return applyBitShift<uint8_t>(value_to_shift, nr_bits, isLeftShift);
-        case sizeof(uint16_t):
-            return applyBitShift<uint16_t>(value_to_shift, nr_bits, isLeftShift);
-        case sizeof(uint32_t):
-            return applyBitShift<uint32_t>(value_to_shift, nr_bits, isLeftShift);
-        case sizeof(uint64_t):
-            return applyBitShift<uint64_t>(value_to_shift, nr_bits, isLeftShift);
-        default:
-            throw std::runtime_error("data must be exactly the size of a default integer type (1,2,4 or 8 bytes)");
+  std::vector<uint8_t> const value_to_shift = args[0].call(data);
+  auto const nr_bits = convertDataToType<uint16_t>(args[1].call(data));
+  switch (value_to_shift.size()) {
+    case sizeof(uint8_t):
+      return applyBitShift<uint8_t>(value_to_shift, nr_bits, isLeftShift);
+    case sizeof(uint16_t):
+      return applyBitShift<uint16_t>(value_to_shift, nr_bits, isLeftShift);
+    case sizeof(uint32_t):
+      return applyBitShift<uint32_t>(value_to_shift, nr_bits, isLeftShift);
+    case sizeof(uint64_t):
+      return applyBitShift<uint64_t>(value_to_shift, nr_bits, isLeftShift);
+    default:
+      throw std::runtime_error("data must be exactly the size of a default "
+                               "integer type (1,2,4 or 8 bytes)");
     }
 }
 
 template<typename T>
 T ModifierFunction::convertDataToType(const std::vector<uint8_t>& data) {
-    // if (data.size() < sizeof(T)) {
-    //     throw std::runtime_error("Data size mismatch");
-    // }
     T value = 0;
     std::memcpy(&value, data.data(), data.size());
     return value;

@@ -1,5 +1,8 @@
+#include "ModifierFunction.h"
 #include <CanValueTemplate.h>
-
+#include <cstdint>
+#include <memory>
+#include <vector>
 
 CanValueTemplate::CanValueTemplate(pugi::xml_node template_description)
 {
@@ -12,5 +15,6 @@ std::vector<uint8_t> CanValueTemplate::parseData(std::vector<uint8_t> can_data)
 {   
     return this->root_function->call(can_data);
 }
+
 
 

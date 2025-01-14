@@ -1,5 +1,10 @@
+#include "CanValueTemplate.h"
+#include "ModifierFunction.h"
 #include <CanMessageTemplate.h>
 #include <cstdint>
+#include <memory>
+#include <stdexcept>
+#include <vector>
 
 CanMessageTemplate::CanMessageTemplate(pugi::xml_node& msg) {
     name = msg.attribute("Name").as_string();
@@ -10,9 +15,20 @@ CanMessageTemplate::CanMessageTemplate(pugi::xml_node& msg) {
     }
 
     
-    // auto filter_function = CanValueTemplate(msg.child("FILTER_FUNCTION"));
+    filter_function = std::make_shared<ModifierFunction>(msg.child("FILTER_FUNCTION").first_child());
 
 }
+
+bool CanMessageTemplate::isMatch(std::vector<uint8_t> can_data)
+{   
+    std::vector<uint8_t> result = this->filter_function->call(can_data);
+    if(result.size() == 1) {
+        return (result.data()[0] == 1);
+    }
+    throw std::runtime_error("not size bool");
+}
+
+
 std::vector<int64_t>
 CanMessageTemplate::parseData(std::vector<uint8_t> can_data)
 {
@@ -40,4 +56,8 @@ CanMessageTemplate::parseData(std::vector<uint8_t> can_data)
         ii++;
     }
     return values;
+}
+
+std::string CanMessageTemplate::getName() {
+    return this->name;
 }
