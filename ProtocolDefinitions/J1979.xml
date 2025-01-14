@@ -1,235 +1,411 @@
 <ProtocolDefintion name="SAE_J1979">
     <Message Name="M01PIDSUPPORT" Description="Mode $01 response for supported PID's">
+        <FILTER_FUNCTION name="filter" DataType="bool" Unit="flag">
+            <LOGICAL_AND>
+                <INT_COMPARE_CONST arg1="0x41">
+                    <BYTE_SELECT arg1="0" arg2="1" />
+                </INT_COMPARE_CONST>
+                <INT_COMPARE_CONST arg1="0x00">
+                    <BYTE_SELECT arg1="1" arg2="2" />
+                </INT_COMPARE_CONST>
+            </LOGICAL_AND>
+        </FILTER_FUNCTION>
         <Values>
             <Value name="PID01SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="2" arg2="3"/>
-                    <BITWISE_AND arg1="128" />
-                    <BITSHIFT_RIGHT arg1="7" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="2"/>
+                            <CONSTANT value="3"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="7"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID02SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="2" arg2="3"/>
-                    <BITWISE_AND arg1="64" />
-                    <BITSHIFT_RIGHT arg1="6" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="2"/>
+                            <CONSTANT value="3"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="6"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID03SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="2" arg2="3"/>
-                    <BITWISE_AND arg1="32" />
-                    <BITSHIFT_RIGHT arg1="5" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="2"/>
+                            <CONSTANT value="3"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="5"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID04SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="2" arg2="3"/>
-                    <BITWISE_AND arg1="16" />
-                    <BITSHIFT_RIGHT arg1="4" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="2"/>
+                            <CONSTANT value="3"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="4"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID05SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="2" arg2="3"/>
-                    <BITWISE_AND arg1="8" />
-                    <BITSHIFT_RIGHT arg1="3" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="2"/>
+                            <CONSTANT value="3"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="3"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID06SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="2" arg2="3"/>
-                    <BITWISE_AND arg1="4" />
-                    <BITSHIFT_RIGHT arg1="2" />
-                </Operations>
-            </Value>            
-            <Value name="PID07SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="2" arg2="3"/>
-                    <BITWISE_AND arg1="2" />
-                    <BITSHIFT_RIGHT arg1="1" />
-                </Operations>
-            </Value>            
-            <Value name="PID08SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="2" arg2="3"/>
-                    <BITWISE_AND arg1="1" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="2"/>
+                            <CONSTANT value="3"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="2"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
+            <Value name="PID07SUPPORT" DataType="bool" Unit="flag">
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="2"/>
+                            <CONSTANT value="3"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="1"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
+            </Value>
+            <Value name="PID08SUPPORT" DataType="bool" Unit="flag">
+                <BITWISE_AND>
+                        <BYTE_SELECT>
+                            <CONSTANT value="2"/>
+                            <CONSTANT value="3"/>
+                        </BYTE_SELECT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
+            </Value>
+            
+
             <Value name="PID09SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="3" arg2="4"/>
-                    <BITWISE_AND arg1="128" />
-                    <BITSHIFT_RIGHT arg1="7" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="3"/>
+                            <CONSTANT value="4"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="7"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID0ASUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="3" arg2="4"/>
-                    <BITWISE_AND arg1="64" />
-                    <BITSHIFT_RIGHT arg1="6" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="3"/>
+                            <CONSTANT value="4"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="6"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID0BSUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="3" arg2="4"/>
-                    <BITWISE_AND arg1="32" />
-                    <BITSHIFT_RIGHT arg1="5" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="3"/>
+                            <CONSTANT value="4"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="5"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID0CSUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="3" arg2="4"/>
-                    <BITWISE_AND arg1="16" />
-                    <BITSHIFT_RIGHT arg1="4" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="3"/>
+                            <CONSTANT value="4"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="4"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID0DSUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="3" arg2="4"/>
-                    <BITWISE_AND arg1="8" />
-                    <BITSHIFT_RIGHT arg1="3" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="3"/>
+                            <CONSTANT value="4"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="3"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID0ESUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="3" arg2="4"/>
-                    <BITWISE_AND arg1="4" />
-                    <BITSHIFT_RIGHT arg1="2" />
-                </Operations>
-            </Value>            
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="3"/>
+                            <CONSTANT value="4"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="2"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
+            </Value>
             <Value name="PID0FSUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="3" arg2="4"/>
-                    <BITWISE_AND arg1="2" />
-                    <BITSHIFT_RIGHT arg1="1" />
-                </Operations>
-            </Value>            
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="3"/>
+                            <CONSTANT value="4"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="1"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
+            </Value>
             <Value name="PID10SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="3" arg2="4"/>
-                    <BITWISE_AND arg1="1" />
-                </Operations>
-            </Value>
-            <Value name="PID11SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="4" arg2="5"/>
-                    <BITWISE_AND arg1="128" />
-                    <BITSHIFT_RIGHT arg1="7" />
-                </Operations>
-            </Value>
-            <Value name="PID12SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="4" arg2="5"/>
-                    <BITWISE_AND arg1="64" />
-                    <BITSHIFT_RIGHT arg1="6" />
-                </Operations>
-            </Value>
-            <Value name="PID13SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="4" arg2="5"/>
-                    <BITWISE_AND arg1="32" />
-                    <BITSHIFT_RIGHT arg1="5" />
-                </Operations>
-            </Value>
-            <Value name="PID14SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="4" arg2="5"/>
-                    <BITWISE_AND arg1="16" />
-                    <BITSHIFT_RIGHT arg1="4" />
-                </Operations>
-            </Value>
-            <Value name="PID15SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="4" arg2="5"/>
-                    <BITWISE_AND arg1="8" />
-                    <BITSHIFT_RIGHT arg1="3" />
-                </Operations>
-            </Value>
-            <Value name="PID16SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="4" arg2="5"/>
-                    <BITWISE_AND arg1="4" />
-                    <BITSHIFT_RIGHT arg1="2" />
-                </Operations>
-            </Value>            
-            <Value name="PID17SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="4" arg2="5"/>
-                    <BITWISE_AND arg1="2" />
-                    <BITSHIFT_RIGHT arg1="1" />
-                </Operations>
-            </Value>            
-            <Value name="PID18SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="4" arg2="5"/>
-                    <BITWISE_AND arg1="1" />
-                </Operations>
+                <BITWISE_AND>
+                        <BYTE_SELECT>
+                            <CONSTANT value="3"/>
+                            <CONSTANT value="4"/>
+                        </BYTE_SELECT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
 
+            <Value name="PID11SUPPORT" DataType="bool" Unit="flag">
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="4"/>
+                            <CONSTANT value="5"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="7"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
+            </Value>
+            <Value name="PID12SUPPORT" DataType="bool" Unit="flag">
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="4"/>
+                            <CONSTANT value="5"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="6"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
+            </Value>
+            <Value name="PID13SUPPORT" DataType="bool" Unit="flag">
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="4"/>
+                            <CONSTANT value="5"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="5"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
+            </Value>
+            <Value name="PID14SUPPORT" DataType="bool" Unit="flag">
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="4"/>
+                            <CONSTANT value="5"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="4"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
+            </Value>
+            <Value name="PID15SUPPORT" DataType="bool" Unit="flag">
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="4"/>
+                            <CONSTANT value="5"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="3"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
+            </Value>
+            <Value name="PID16SUPPORT" DataType="bool" Unit="flag">
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="4"/>
+                            <CONSTANT value="5"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="2"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
+            </Value>
+            <Value name="PID17SUPPORT" DataType="bool" Unit="flag">
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="4"/>
+                            <CONSTANT value="5"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="1"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
+            </Value>
+            <Value name="PID18SUPPORT" DataType="bool" Unit="flag">
+                <BITWISE_AND>
+                        <BYTE_SELECT>
+                            <CONSTANT value="4"/>
+                            <CONSTANT value="5"/>
+                        </BYTE_SELECT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
+            </Value>
+            
             <Value name="PID19SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="5" arg2="6"/>
-                    <BITWISE_AND arg1="128" />
-                    <BITSHIFT_RIGHT arg1="7" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="5"/>
+                            <CONSTANT value="6"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="7"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID1ASUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="5" arg2="6"/>
-                    <BITWISE_AND arg1="64" />
-                    <BITSHIFT_RIGHT arg1="6" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="5"/>
+                            <CONSTANT value="6"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="6"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID1BSUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="5" arg2="6"/>
-                    <BITWISE_AND arg1="32" />
-                    <BITSHIFT_RIGHT arg1="5" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="5"/>
+                            <CONSTANT value="6"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="5"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID1CSUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="5" arg2="6"/>
-                    <BITWISE_AND arg1="16" />
-                    <BITSHIFT_RIGHT arg1="4" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="5"/>
+                            <CONSTANT value="6"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="4"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID1DSUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="5" arg2="6"/>
-                    <BITWISE_AND arg1="8" />
-                    <BITSHIFT_RIGHT arg1="3" />
-                </Operations>
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="5"/>
+                            <CONSTANT value="6"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="3"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
             <Value name="PID1ESUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="5" arg2="6"/>
-                    <BITWISE_AND arg1="4" />
-                    <BITSHIFT_RIGHT arg1="2" />
-                </Operations>
-            </Value>            
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="5"/>
+                            <CONSTANT value="6"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="2"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
+            </Value>
             <Value name="PID1FSUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="5" arg2="6"/>
-                    <BITWISE_AND arg1="2" />
-                    <BITSHIFT_RIGHT arg1="1" />
-                </Operations>
-            </Value>            
+                <BITWISE_AND>
+                    <BITSHIFT_RIGHT>
+                        <BYTE_SELECT>
+                            <CONSTANT value="5"/>
+                            <CONSTANT value="6"/>
+                        </BYTE_SELECT>
+                        <CONSTANT value="1"/>
+                    </BITSHIFT_RIGHT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
+            </Value>
             <Value name="PID20SUPPORT" DataType="bool" Unit="flag">
-                <Operations>
-                    <BYTE_SELECT arg1="5" arg2="6"/>
-                    <BITWISE_AND arg1="1" />
-                </Operations>
+                <BITWISE_AND>
+                        <BYTE_SELECT>
+                            <CONSTANT value="5"/>
+                            <CONSTANT value="6"/>
+                        </BYTE_SELECT>
+                    <CONSTANT value="1"/>
+                </BITWISE_AND>
             </Value>
         </Values>
     </Message>
     <Message Name="M01VehicleSpeed" Description="Mode $01 response for VehicleSpeed">
+        <FILTER_FUNCTION name="filter" DataType="bool" Unit="flag">
+            <LOGICAL_AND>
+                <INT_COMPARE_CONST arg1="0x41">
+                    <BYTE_SELECT arg1="0" arg2="1" />
+                </INT_COMPARE_CONST>
+                <INT_COMPARE_CONST arg1="0x0D">
+                    <BYTE_SELECT arg1="1" arg2="2" />
+                </INT_COMPARE_CONST>
+            </LOGICAL_AND>
+        </FILTER_FUNCTION>
         <Values>
             <Value name="VehicleSpeed" DataType="uint8" Unit="kph">
-                <Operations>
-                    <BYTE_SELECT arg1="2" arg2="3"/>
-                </Operations>
+                <BYTE_SELECT>
+                    <CONSTANT value="2"/>
+                    <CONSTANT value="3"/>
+                </BYTE_SELECT>
             </Value>
         </Values>
     </Message>

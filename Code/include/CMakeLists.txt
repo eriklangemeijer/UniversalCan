@@ -2,6 +2,7 @@ set(UniversalCan_INC
     CanMessage.h
     CanMessageTemplate.h
     CanValueTemplate.h
+    ModifierFunction.h
     ProtocolMapper.h
     ProtocolDefinitionParser.h
     Transcievers/ELM327.h

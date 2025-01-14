@@ -3,6 +3,7 @@ set(UniversalCan_SRC
     CanMessage.cpp
     CanMessageTemplate.cpp
     CanValueTemplate.cpp
+    ModifierFunction.cpp
     ProtocolDefinitionParser.cpp
 )
 if(WIN32)

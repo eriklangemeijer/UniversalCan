@@ -8,6 +8,10 @@ CanMessageTemplate::CanMessageTemplate(pugi::xml_node& msg) {
     for (auto value = msg.child("Values").child("Value"); value; value = value.next_sibling("Value")) {
         value_list.emplace_back(value);
     }
+
+    
+    // auto filter_function = CanValueTemplate(msg.child("FILTER_FUNCTION"));
+
 }
 std::vector<int64_t>
 CanMessageTemplate::parseData(std::vector<uint8_t> can_data)
