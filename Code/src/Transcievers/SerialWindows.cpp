@@ -99,7 +99,7 @@ std::string SerialWindows::read() {
     return "";
 }
 
-void SerialWindows::registerCallback(std::function<void(std::string)> callback) {
+void SerialWindows::registerCallback(std::function<void(std::vector<uint8_t>)> callback) {
     this->callbackPtr = callback;
     running = true;
     std::thread(&SerialWindows::threadFunction, this).detach();

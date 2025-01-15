@@ -1,6 +1,7 @@
 set(UniversalCan_INC
     CanMessage.h
     CanMessageTemplate.h
+    CanValue.h
     CanValueTemplate.h
     ModifierFunction.h
     ProtocolMapper.h

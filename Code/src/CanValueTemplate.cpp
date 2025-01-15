@@ -16,5 +16,15 @@ std::vector<uint8_t> CanValueTemplate::parseData(std::vector<uint8_t> can_data)
     return this->root_function->call(can_data);
 }
 
+std::string CanValueTemplate::getValueName() const
+{
+    return value_name;
+}
+
+std::string CanValueTemplate::getDataType() const
+{
+    return data_type;
+}
+
 
 

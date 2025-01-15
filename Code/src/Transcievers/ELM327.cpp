@@ -1,15 +1,19 @@
+#include "ProtocolDefinitionParser.h"
 #include <Transcievers/ELM327.h>
 #include <Transcievers/ISerial.h>
-#include <iostream>
-#include <algorithm>
 #include <chrono>
+#include <cstdint>
+#include <functional>
+#include <memory>
 #include <thread>
+#include <utility>
+#include <vector>
 
 const uint16_t response_wait_sleep_time_ns = 10;
 const uint16_t response_wait_timeout_ms = 50;
 
-ELM327::ELM327(std::unique_ptr<ISerial> serial) 
-    : serial(std::move(serial)), running(false), ready(false) {
+ELM327::ELM327(std::unique_ptr<ISerial> serial, std::unique_ptr<ProtocolDefinitionParser> protocol_parser) 
+    : serial(std::move(serial)), protocol_parser(std::move(protocol_parser)), running(false), ready(false) {
             
     }
 
@@ -29,21 +33,28 @@ void ELM327::start() {
 }
 
 
-void ELM327::serialReceiveCallback(const std::string& message) {
+void ELM327::serialReceiveCallback(std::vector<uint8_t> message) {
     // std::cout << "REC:" << message << std::endl;
-    if((message.rfind("ELM327 v", 0) == 0)) {
+    std::string const message_str(message.begin(), message.end());
+    if((message_str.rfind("ELM327 v", 0) == 0)) {
         this->running = true;
     }
     this->ready = message.back() == '>'; 
-    storeMessage(message);
+
+
+    auto msg_template = this->protocol_parser->findMatch(message);
+    auto can_message = CanMessage(message, msg_template);
+
+    storeMessage(can_message);
 }
 
 bool ELM327::sendMessage(std::vector<CanMessage> messages) {
     for (const auto& msg : messages) {
-        std::vector<uint8_t> data(reinterpret_cast<const uint8_t*>(&msg), 
-                                  reinterpret_cast<const uint8_t*>(&msg) + sizeof(msg));
-        if (!serial->write(data)) {
-            return false;
+      std::vector<uint8_t> const data(reinterpret_cast<const uint8_t*>(&msg),
+                                      reinterpret_cast<const uint8_t*>(&msg) +
+                                        sizeof(msg));
+      if (!serial->write(data)) {
+        return false;
         }
     }
     return true;
@@ -67,7 +78,7 @@ bool ELM327::sendATMessage(std::string command, bool waitForResponse) {
 
 void ELM327::registerCallback(std::function<void(CanMessage)> callback) {
     
-    serial->registerCallback([this](const std::string& message) {
+    serial->registerCallback([this](std::vector<uint8_t> message) {
         this->serialReceiveCallback(message);
     });
     this->callbackFunction = callback;
@@ -77,23 +88,23 @@ void ELM327::registerCallback(std::function<void(CanMessage)> callback) {
 
 bool ELM327::messageAvailable() {
     this->messageListLock.lock();
-    bool available = this->messageList.size() > 0;
+    bool const available = this->messageList.size() > 0;
     this->messageListLock.unlock();
     return available;
 }
 
-void ELM327::storeMessage(std::string message) {
+void ELM327::storeMessage(CanMessage& message) {
     this->messageListLock.lock();
     this->messageList.push_back(message);
     this->messageListLock.unlock();
 
 }
 
-std::string ELM327::readMessage() {
-    std::string message = "";
+std::shared_ptr<CanMessage> ELM327::readMessage() {
+    std::shared_ptr<CanMessage> message = nullptr;
     this->messageListLock.lock();
     if(this->messageList.size() > 0) {
-        message = this->messageList.front();
+        message = std::make_unique<CanMessage>(this->messageList.front());
         this->messageList.pop_front();
     }
     this->messageListLock.unlock();

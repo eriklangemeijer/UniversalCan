@@ -13,5 +13,5 @@ public:
     virtual bool write(const std::vector<uint8_t>& data) = 0;
     virtual bool writeString(std::string data) = 0;
     virtual std::string read() = 0;
-    virtual void registerCallback(std::function<void(std::string)> callback) = 0;
+    virtual void registerCallback(std::function<void(std::vector<uint8_t>)> callback) = 0;
 };

@@ -5,12 +5,12 @@
 #include <functional>
 #include <string>
 #include <list>
-#include <CanValueTemplate.h>
 #include <pugixml.hpp>
 #include <cstdint>
 #include <cstring>
 #include <stdexcept>
 #include <string>
+#include <CanValue.h>
 
 class CanMessageTemplate
 {
@@ -22,7 +22,7 @@ class CanMessageTemplate
     public:
         
         CanMessageTemplate(pugi::xml_node& msg);
-        std::vector<int64_t> parseData(std::vector<uint8_t> can_data);
+        std::vector<CanValue> parseData(std::vector<uint8_t> can_data);
         bool isMatch(std::vector<uint8_t> can_data);
         std::string getName();
 

@@ -1,9 +1,20 @@
+#include "Transcievers/ISerial.h"
 #include <Transcievers/SerialMacOS.h>
-#include <iostream>
-#include <fcntl.h>
-#include <unistd.h>
-#include <termios.h>
 #include <chrono>
+#include <cstdint>
+#include <fcntl.h>
+#include <functional>
+#include <iostream>
+#include <mutex>
+#include <stdexcept>
+#include <string>
+#include <sys/_types/_ssize_t.h>
+#include <sys/fcntl.h>
+#include <termios.h>
+#include <thread>
+#include <unistd.h>
+#include <utility>
+#include <vector>
 
 SerialMacOS::SerialMacOS() : fd_(-1), running(false) {}
 
@@ -12,15 +23,15 @@ SerialMacOS::~SerialMacOS() {
 }
 
 bool SerialMacOS::open(const std::string& port) {
-    std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> const lock(mutex_);
 
-    fd_ = ::open(port.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
-    if (fd_ == -1) {
-        std::cerr << "Failed to open port: " << port << std::endl;
-        return false;
+  fd_ = ::open(port.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
+  if (fd_ == -1) {
+    std::cerr << "Failed to open port: " << port << std::endl;
+    return false;
     }
 
-    struct termios options;
+    struct termios options{};
     tcgetattr(fd_, &options);
     cfsetispeed(&options, B38400);
     cfsetospeed(&options, B38400);
@@ -42,10 +53,10 @@ bool SerialMacOS::open(const std::string& port) {
 }
 
 void SerialMacOS::close() {
-    std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> const lock(mutex_);
 
-    if (this->running) {
-        this->running = false;
+  if (this->running) {
+    this->running = false;
     }
 
     if (fd_ != -1) {
@@ -60,33 +71,33 @@ bool SerialMacOS::writeString(std::string data) {
         
     }
     // Convert the string to a vector of uint8_t
-    std::vector<uint8_t> byte_data(data.begin(), data.end());
+    std::vector<uint8_t> const byte_data(data.begin(), data.end());
 
     // Call the `write` function with the converted data
     return write(byte_data);
 }
 
 bool SerialMacOS::write(const std::vector<uint8_t>& data) {
-    std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> const lock(mutex_);
 
-    if (fd_ == -1) {
-        std::cerr << "Port not open for writing." << std::endl;
-        return false;
+  if (fd_ == -1) {
+    std::cerr << "Port not open for writing." << std::endl;
+    return false;
     }
 
-    ssize_t bytes_written = ::write(fd_, data.data(), data.size());
+    ssize_t const bytes_written = ::write(fd_, data.data(), data.size());
     return bytes_written == static_cast<ssize_t>(data.size());
 }
 
 std::string SerialMacOS::read() {
-    std::lock_guard<std::mutex> lock(mutex_);
+  std::lock_guard<std::mutex> const lock(mutex_);
 
-    if (fd_ == -1) {
-        std::cerr << "Port not open for reading." << std::endl;
-        return "";
+  if (fd_ == -1) {
+    std::cerr << "Port not open for reading." << std::endl;
+    return "";
     }
     std::vector<uint8_t> buffer(SERIAL_READ_BUFFER_SIZE); // Example buffer size
-    ssize_t bytes_read = ::read(fd_, buffer.data(), buffer.size());
+    ssize_t const bytes_read = ::read(fd_, buffer.data(), buffer.size());
     if (bytes_read <= 0) {
         buffer.clear();
         return "";
@@ -97,7 +108,7 @@ std::string SerialMacOS::read() {
     return string_buffer;
 }
 
-void SerialMacOS::registerCallback(std::function<void(std::string)> callback) {
+void SerialMacOS::registerCallback(std::function<void(std::vector<uint8_t>)> callback) {
     this->callbackPtr = callback;
     running = true;
     std::thread(&SerialMacOS::threadFunction, this).detach();
@@ -105,24 +116,24 @@ void SerialMacOS::registerCallback(std::function<void(std::string)> callback) {
 
 
 void SerialMacOS::threadFunction() {
-    std::vector<int8_t> buffer(SERIAL_READ_BUFFER_SIZE);
+    std::vector<uint8_t> rolling_buffer(SERIAL_READ_BUFFER_SIZE);
 
-    std::string string_buffer;
     while (this->running) {
-        ssize_t bytes_read = ::read(fd_, buffer.data(), buffer.size());
+        std::vector<uint8_t> read_buffer;
+        ssize_t const bytes_read =
+          ::read(fd_, read_buffer.data(), read_buffer.size());
         if (bytes_read > 0) {
             if(bytes_read > 0) {
-                for(int8_t character : buffer) {
-                    if(character == '\r') {   
-                        if(!(string_buffer.empty())) { 
-                            this->callbackPtr(std::move(string_buffer));
-                            string_buffer.clear();
-                        }
-                    }
-                    else if(character != 0) {
-                        string_buffer.push_back(character);
-                    }
+              for (uint8_t const character : read_buffer) {
+                if (character == '\r') {
+                  if (!(rolling_buffer.empty())) {
+                    this->callbackPtr(std::move(rolling_buffer));
+                    rolling_buffer.clear();
+                  }
+                } else if (character != 0) {
+                  rolling_buffer.push_back(character);
                 }
+              }
             }
         } else {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));

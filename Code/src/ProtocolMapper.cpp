@@ -1,6 +1,11 @@
+#include <CanMessage.h>
 #include <Transcievers/ELM327.h>
+#include <ProtocolDefinitionParser.h>
+#include <exception>
+#include <string>
+#include <utility>
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-    #define WINDOWS
+#define WINDOWS
 #endif
 
 #ifdef WINDOWS
@@ -11,12 +16,14 @@
 
 #include <stdexcept>
 #include <iostream>
-#include <memory> 
+#include <memory>
 
-void canMessageReceiveCallback(std::string message) {
-    if(message == "ELM327 v2.0\r\r>" or message == "ELM327 v1.3a\r\r>") {
-        return;
-    }
+static void
+canMessageReceiveCallback(std::string message)
+{
+  if (message == "ELM327 v2.0\r\r>" or message == "ELM327 v1.3a\r\r>") {
+    return;
+  }
 }
 
 int main() {
@@ -32,11 +39,11 @@ int main() {
         if (!serial->open(port_name)) {
             throw std::runtime_error("Failed to open serial port");
         }
-        ELM327 elm327(std::move(serial));
-
-        elm327.registerCallback([](const CanMessage& msg) {
-            // Handle incoming CAN message
-            std::cout << "Received CAN message\n";
+        auto parser = std::make_unique<ProtocolDefinitionParser>("../../../ProtocolDefinitions/J1979.xml");
+        ELM327 elm327(std::move(serial), std::move(parser));
+        elm327.registerCallback([](const CanMessage& /*msg*/) {
+          // Handle incoming CAN message
+          std::cout << "Received CAN message\n";
         });
         elm327.start();
         // // Send a test message
@@ -46,8 +53,8 @@ int main() {
         while(true) {
             if(elm327.messageAvailable())
             {
-                std::string message = elm327.readMessage();
-                std::cout << message.c_str() << std::endl;
+                auto message = elm327.readMessage();
+                std::cout << message << std::endl;
             }
         };
 

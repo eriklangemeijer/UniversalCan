@@ -1,4 +1,5 @@
 #include "CanValueTemplate.h"
+#include <CanValue.h>
 #include <CanMessage.h>
 #include <CanMessageTemplate.h>
 #include <ProtocolDefinitionParser.h>
@@ -53,11 +54,12 @@ TEST(M01EngSpdResponse, add)
     std::shared_ptr<CanMessageTemplate> const mode1_veh_spd_template =
       std::make_shared<CanMessageTemplate>(msg);
     CanMessage response_0kph = CanMessage({mode1_response_id, mode1_veh_spd_id, 0}, mode1_veh_spd_template);
-    GTEST_ASSERT_EQ(response_0kph.values[0], 0);
+    response_0kph.print();
+    GTEST_ASSERT_EQ(response_0kph.values[0].getValue<uint8_t>(), 0);
     CanMessage response_60kph = CanMessage({mode1_response_id, mode1_veh_spd_id, 60}, mode1_veh_spd_template);
-    GTEST_ASSERT_EQ(response_60kph.values[0], 60);
+    GTEST_ASSERT_EQ(response_60kph.values[0].getValue<uint8_t>(), 60);
     CanMessage response_120kph = CanMessage({mode1_response_id, mode1_veh_spd_id, 120}, mode1_veh_spd_template);
-    GTEST_ASSERT_EQ(response_120kph.values[0], 120);
+    GTEST_ASSERT_EQ(response_120kph.values[0].getValue<uint8_t>(), 120);
 }
 
 TEST(M01PIDSupportResponse, add)
@@ -74,7 +76,7 @@ TEST(M01PIDSupportResponse, add)
                                            false, false, false, true, false, false, true, true};
     for(uint8_t ii = 0; ii < expected_response.size(); ii++) {
         
-        GTEST_ASSERT_EQ((bool)response_supp_pid.values[ii], (bool)expected_response[ii]);
+        GTEST_ASSERT_EQ(response_supp_pid.values[ii].getBoolValue(), expected_response[ii]);
     }
     
 }
@@ -90,9 +92,11 @@ TEST(findTemplate, add)
 {
     ProtocolDefinitionParser parser =
                         ProtocolDefinitionParser("../../../ProtocolDefinitions/J1979.xml");
-    std::vector<uint8_t> msg_data = {mode1_response_id, mode1_veh_spd_id, 0};
+    std::vector<uint8_t> const msg_data = { mode1_response_id,
+                                            mode1_veh_spd_id,
+                                            0 };
     auto msg_template = parser.findMatch(msg_data);
-    GTEST_ASSERT_TRUE(strcmp(msg_template.getName().c_str(), "M01VehicleSpeed") == 0);
+    GTEST_ASSERT_TRUE(strcmp(msg_template->getName().c_str(), "M01VehicleSpeed") == 0);
 }
 
 int main(int argc, char* argv[])

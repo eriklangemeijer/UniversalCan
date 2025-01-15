@@ -16,5 +16,8 @@ class CanValueTemplate
     public:        
         CanValueTemplate(pugi::xml_node template_description);
         std::vector<uint8_t> parseData(std::vector<uint8_t> can_data);
+        std::string getValueName() const;
+        std::string getDataType() const;
+
 
 };

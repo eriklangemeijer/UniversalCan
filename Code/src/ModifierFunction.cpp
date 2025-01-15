@@ -29,15 +29,15 @@ ModifierFunction::ModifierFunction(pugi::xml_node operation)
     arguments.emplace_back(argument);
   }
 
-  std::regex pattern(R"(arg(\d+))");
-  for (pugi::xml_attribute attr : operation.attributes()) {
+  std::regex const pattern(R"(arg(\d+))");
+  for (pugi::xml_attribute const attr : operation.attributes()) {
 
     std::smatch match;
-    std::string attr_name = attr.name();
+    std::string const attr_name = attr.name();
     if (std::regex_match(attr_name, match, pattern)) {
-        int index = std::stoi(match[1].str());
-        if(index >= 1){
-            arguments.insert(arguments.begin() + index-1, attr);
+      int const index = std::stoi(match[1].str());
+      if (index >= 1) {
+        arguments.insert(arguments.begin() + index - 1, attr);
         }
         else {
             std::cout << "Invalid argument number " << index << std::endl;
@@ -45,8 +45,6 @@ ModifierFunction::ModifierFunction(pugi::xml_node operation)
               
     }
   }
-  
-  
 
   if (strcmp(operation.name(), "BYTE_SELECT") == 0) {
     function =

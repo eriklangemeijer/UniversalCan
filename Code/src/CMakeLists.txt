@@ -1,4 +1,5 @@
 set(UniversalCan_SRC
+    CanValue.cpp
     Transcievers/ELM327.cpp
     CanMessage.cpp
     CanMessageTemplate.cpp

@@ -13,5 +13,5 @@ class ProtocolDefinitionParser {
     public:
         ProtocolDefinitionParser(std::string filename);
         std::list<CanMessageTemplate> getMessageList();
-        CanMessageTemplate& findMatch(std::vector<uint8_t> can_data);
+        std::shared_ptr<CanMessageTemplate>  findMatch(std::vector<uint8_t> can_data);
 };

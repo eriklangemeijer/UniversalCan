@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <list>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -78,11 +79,11 @@ std::list<CanMessageTemplate> ProtocolDefinitionParser::getMessageList() {
     return message_list;
 }
 
-CanMessageTemplate& ProtocolDefinitionParser::findMatch(std::vector<uint8_t> can_data) {
-    for (auto& message : this->message_list) {
+std::shared_ptr<CanMessageTemplate> ProtocolDefinitionParser::findMatch(std::vector<uint8_t> can_data) {
+    for (auto message : this->message_list) {
         if (message.isMatch(can_data)) {
-            return message; // Return a reference to the matching message
+            return std::make_shared<CanMessageTemplate>(message); // Return a reference to the matching message
         }
     }
-    throw std::runtime_error("Template not found");
+    return nullptr;
 }

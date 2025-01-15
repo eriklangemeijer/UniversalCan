@@ -16,7 +16,7 @@ private:
     std::mutex mutex_;
     std::mutex callbackMutex_;
     bool running;
-    std::function<void(std::string)> callbackPtr;
+    std::function<void(std::vector<uint8_t>)> callbackPtr;
     void threadFunction();
 public:
     SerialMacOS();
@@ -27,6 +27,6 @@ public:
     bool writeString(std::string data) override;
     bool write(const std::vector<uint8_t>& data) override;
     std::string read() override;
-    void registerCallback(std::function<void(std::string)> callback) override;
+    void registerCallback(std::function<void(std::vector<uint8_t>)> callback) override;
 };
 
