@@ -10,7 +10,7 @@ CanValue::CanValue(CanValueTemplate& template_description, std::vector<uint8_t> 
                                                             value_name(template_description.getValueName()),
                                                             data_type(template_description.getDataType())
 {
-    value = template_description.parseData(can_data);                                  
+    value = template_description.parseData(can_data);                           
 
 }
 

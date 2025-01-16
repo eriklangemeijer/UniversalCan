@@ -1,5 +1,41 @@
 <ProtocolDefintion name="BMW Motorrad">
 
 <include path="./J1979.xml"/>
-
+<Message Name="M01VehicleSpeed" Description="Mode $01 response for VehicleSpeed">
+    <FILTER_FUNCTION name="filter" DataType="bool" Unit="flag">
+        <INT_COMPARE>
+            <BYTE_SELECT arg1="0" arg2="1"/>
+            <CONSTANT value="0x10C"/>
+        </INT_COMPARE>
+    </FILTER_FUNCTION>
+    <Values>
+        <Value name="ThrottleValvePos" DataType="uint8" Unit="%">
+            <MULTIPLY arg2="100">
+                <DIVIDE arg2="255">
+                    <BYTE_SELECT>
+                        <CONSTANT value="1"/>
+                        <CONSTANT value="2"/>
+                    </BYTE_SELECT>
+                </DIVIDE>
+            </MULTIPLY>
+        </Value>
+        <Value name="EngineRPM" DataType="uint8" Unit="rpm">
+            <DIVIDE arg2="4">
+                <ADD>
+                    <BYTE_SELECT>
+                        <CONSTANT value="2"/>
+                        <CONSTANT value="3"/>
+                    </BYTE_SELECT>
+                    <MULTIPLY arg2="256">
+                        <BYTE_SELECT>
+                            <CONSTANT value="3"/>
+                            <CONSTANT value="4"/>
+                        </BYTE_SELECT>
+                    </MULTIPLY>
+                </ADD>
+            </DIVIDE>
+        </Value>
+        
+    </Values>
+</Message>
 </ProtocolDefintion>

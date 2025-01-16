@@ -35,7 +35,7 @@ CanMessageTemplate::parseData(std::vector<uint8_t> can_data)
 {
     std::vector<CanValue> values;
     for(auto value : this->value_list) {
-      values.emplace_back(value, can_data);
+        values.emplace_back(value, can_data);
     }
     return values;
 }

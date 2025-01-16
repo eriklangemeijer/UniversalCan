@@ -46,15 +46,12 @@ int main() {
           std::cout << "Received CAN message\n";
         });
         elm327.start();
-        // // Send a test message
-        // std::vector<CanMessage> messages = { /* populate messages */ };
-        // elm327.sendMessage(messages);
 
         while(true) {
             if(elm327.messageAvailable())
             {
                 auto message = elm327.readMessage();
-                std::cout << message << std::endl;
+                message->print();
             }
         };
 

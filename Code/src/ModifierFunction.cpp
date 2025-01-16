@@ -94,6 +94,30 @@ ModifierFunction::ModifierFunction(pugi::xml_node operation)
         return callOperationForDatatype(data, args, std::logical_and<>());
       });
   } 
+  else if (strcmp(operation.name(), "MULTIPLY") == 0) {
+    function =
+      ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
+        return callOperationForDatatype(data, args, std::multiplies<>());
+      });
+  } 
+  else if (strcmp(operation.name(), "DIVIDE") == 0) {
+    function =
+      ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
+        return callOperationForDatatype(data, args, std::divides<>());
+      });
+  } 
+  else if (strcmp(operation.name(), "ADD") == 0) {
+    function =
+      ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
+        return callOperationForDatatype(data, args, std::plus<>());
+      });
+  } 
+  else if (strcmp(operation.name(), "SUBTRACT") == 0) {
+    function =
+      ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
+        return callOperationForDatatype(data, args, std::minus<>());
+      });
+  } 
   else if (strcmp(operation.name(), "CONSTANT") == 0) {
     int const const_value = operation.attribute("value").as_int();
     function = ([this, const_value](std::vector<uint8_t>,
@@ -116,7 +140,10 @@ std::vector<uint8_t> ModifierFunction::modifierSelectByte(std::vector<uint8_t> d
   if (byte_start > byte_end || (byte_end - byte_start) > max_value_size) {
     throw std::runtime_error("byte_start must be smaller than byte_end");
     }
-    return { data.begin() + byte_start, data.begin() + byte_end };
+    std::cout << "selecting vector " << this->name << " data size =" << data.size() << "Selecting" << byte_start <<"," <<byte_end <<"\n";
+    std::vector<uint8_t> ret = { data.begin() + byte_start, data.begin() + byte_end };
+    std::cout << "returning vector " << this->name << " data size =" << ret.size() <<"\n";
+    return ret;
 }
 
 template<typename T, typename Op>
@@ -124,6 +151,7 @@ std::vector<uint8_t> ModifierFunction::applyOperation(std::vector<uint8_t> data,
     T value = convertDataToType<T>(data);
     value = operation(value, static_cast<T>(argument1));  // Apply the bitwise operation using the passed operation
     copyTypeToData(value, data);
+    std::cout << "returning vector " << this->name << "\n";
     return data;
 }
 
