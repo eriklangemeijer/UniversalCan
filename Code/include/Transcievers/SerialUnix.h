@@ -1,15 +1,15 @@
 #pragma once
 
 #include <Transcievers/ISerial.h>
+#include <atomic>
 #include <functional>
-#include <vector>
+#include <mutex>
 #include <string>
 #include <thread>
-#include <mutex>
-#include <atomic>
+#include <vector>
 
 class SerialUnix : public ISerial {
-private:
+  private:
     void readLoop();
 
     int fd_;
@@ -18,15 +18,15 @@ private:
     bool running;
     std::function<void(std::vector<uint8_t>)> callbackPtr;
     void threadFunction();
-public:
+
+  public:
     SerialUnix();
     ~SerialUnix();
 
-    bool open(const std::string& port) override;
+    bool open(const std::string &port) override;
     void close() override;
     bool writeString(std::string data) override;
-    bool write(const std::vector<uint8_t>& data) override;
+    bool write(const std::vector<uint8_t> &data) override;
     std::string read() override;
     void registerCallback(std::function<void(std::vector<uint8_t>)> callback) override;
 };
-

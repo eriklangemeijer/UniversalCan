@@ -1,0 +1,6 @@
+# .clang-format
+BasedOnStyle:  LLVM
+Language: Cpp
+MaxEmptyLinesToKeep: 1
+ColumnLimit: 0
+IndentWidth: 4

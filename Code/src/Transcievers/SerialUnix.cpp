@@ -21,13 +21,13 @@ SerialUnix::~SerialUnix() {
     close();
 }
 
-bool SerialUnix::open(const std::string& port) {
-  std::lock_guard<std::mutex> const lock(mutex_);
+bool SerialUnix::open(const std::string &port) {
+    std::lock_guard<std::mutex> const lock(mutex_);
 
-  fd_ = ::open(port.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
-  if (fd_ == -1) {
-    std::cerr << "Failed to open port: " << port << std::endl;
-    return false;
+    fd_ = ::open(port.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
+    if (fd_ == -1) {
+        std::cerr << "Failed to open port: " << port << std::endl;
+        return false;
     }
 
     struct termios options{};
@@ -52,10 +52,10 @@ bool SerialUnix::open(const std::string& port) {
 }
 
 void SerialUnix::close() {
-  std::lock_guard<std::mutex> const lock(mutex_);
+    std::lock_guard<std::mutex> const lock(mutex_);
 
-  if (this->running) {
-    this->running = false;
+    if (this->running) {
+        this->running = false;
     }
 
     if (fd_ != -1) {
@@ -65,9 +65,8 @@ void SerialUnix::close() {
 }
 
 bool SerialUnix::writeString(std::string data) {
-    if (data.rfind("AT", 0) != 0) { 
+    if (data.rfind("AT", 0) != 0) {
         throw std::runtime_error("Trying to send something that is not an AT command. To prevent self harm this is currently not possible");
-        
     }
     // Convert the string to a vector of uint8_t
     std::vector<uint8_t> const byte_data(data.begin(), data.end());
@@ -76,12 +75,12 @@ bool SerialUnix::writeString(std::string data) {
     return write(byte_data);
 }
 
-bool SerialUnix::write(const std::vector<uint8_t>& data) {
-  std::lock_guard<std::mutex> const lock(mutex_);
+bool SerialUnix::write(const std::vector<uint8_t> &data) {
+    std::lock_guard<std::mutex> const lock(mutex_);
 
-  if (fd_ == -1) {
-    std::cerr << "Port not open for writing." << std::endl;
-    return false;
+    if (fd_ == -1) {
+        std::cerr << "Port not open for writing." << std::endl;
+        return false;
     }
 
     ssize_t const bytes_written = ::write(fd_, data.data(), data.size());
@@ -89,11 +88,11 @@ bool SerialUnix::write(const std::vector<uint8_t>& data) {
 }
 
 std::string SerialUnix::read() {
-  std::lock_guard<std::mutex> const lock(mutex_);
+    std::lock_guard<std::mutex> const lock(mutex_);
 
-  if (fd_ == -1) {
-    std::cerr << "Port not open for reading." << std::endl;
-    return "";
+    if (fd_ == -1) {
+        std::cerr << "Port not open for reading." << std::endl;
+        return "";
     }
     std::vector<uint8_t> buffer(SERIAL_READ_BUFFER_SIZE); // Example buffer size
     ssize_t const bytes_read = ::read(fd_, buffer.data(), buffer.size());
@@ -113,26 +112,25 @@ void SerialUnix::registerCallback(std::function<void(std::vector<uint8_t>)> call
     std::thread(&SerialUnix::threadFunction, this).detach();
 }
 
-
 void SerialUnix::threadFunction() {
     std::vector<uint8_t> rolling_buffer(SERIAL_READ_BUFFER_SIZE);
 
     while (this->running) {
         std::vector<uint8_t> read_buffer;
         ssize_t const bytes_read =
-          ::read(fd_, read_buffer.data(), read_buffer.size());
+            ::read(fd_, read_buffer.data(), read_buffer.size());
         if (bytes_read > 0) {
-            if(bytes_read > 0) {
-              for (uint8_t const character : read_buffer) {
-                if (character == '\r') {
-                  if (!(rolling_buffer.empty())) {
-                    this->callbackPtr(std::move(rolling_buffer));
-                    rolling_buffer.clear();
-                  }
-                } else if (character != 0) {
-                  rolling_buffer.push_back(character);
+            if (bytes_read > 0) {
+                for (uint8_t const character : read_buffer) {
+                    if (character == '\r') {
+                        if (!(rolling_buffer.empty())) {
+                            this->callbackPtr(std::move(rolling_buffer));
+                            rolling_buffer.clear();
+                        }
+                    } else if (character != 0) {
+                        rolling_buffer.push_back(character);
+                    }
                 }
-              }
             }
         } else {
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
