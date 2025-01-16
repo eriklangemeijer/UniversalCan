@@ -54,7 +54,6 @@ TEST(M01EngSpdResponse, add)
     std::shared_ptr<CanMessageTemplate> const mode1_veh_spd_template =
       std::make_shared<CanMessageTemplate>(msg);
     CanMessage response_0kph = CanMessage({mode1_response_id, mode1_veh_spd_id, 0}, mode1_veh_spd_template);
-    response_0kph.print();
     GTEST_ASSERT_EQ(response_0kph.values[0].getValue<uint8_t>(), 0);
     CanMessage response_60kph = CanMessage({mode1_response_id, mode1_veh_spd_id, 60}, mode1_veh_spd_template);
     GTEST_ASSERT_EQ(response_60kph.values[0].getValue<uint8_t>(), 60);

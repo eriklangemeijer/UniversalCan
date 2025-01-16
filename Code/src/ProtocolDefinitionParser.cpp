@@ -1,7 +1,7 @@
 #include "CanMessageTemplate.h"
 #include "CanValueTemplate.h"
 #include <ProtocolDefinitionParser.h>
-#include <_stdlib.h>
+#include <stdlib.h>
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>

@@ -10,8 +10,8 @@
 
 #ifdef WINDOWS
     #include <Transcievers/SerialWindows.h>
-#elif __APPLE__
-    #include <Transcievers/SerialMacOS.h>
+#else
+    #include <Transcievers/SerialUnix.h>
 #endif
 
 #include <stdexcept>
@@ -31,8 +31,8 @@ int main() {
         #ifdef WINDOWS
             auto serial = std::make_unique<SerialWindows>();
             const std::string port_name = "COM9";
-        #elif __APPLE__
-            auto serial = std::make_unique<SerialMacOS>();
+        #else
+            auto serial = std::make_unique<SerialUnix>();
             const std::string port_name = "/dev/tty.usbserial-110";
         #endif
         

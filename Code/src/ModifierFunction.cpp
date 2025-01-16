@@ -140,9 +140,7 @@ std::vector<uint8_t> ModifierFunction::modifierSelectByte(std::vector<uint8_t> d
   if (byte_start > byte_end || (byte_end - byte_start) > max_value_size) {
     throw std::runtime_error("byte_start must be smaller than byte_end");
     }
-    std::cout << "selecting vector " << this->name << " data size =" << data.size() << "Selecting" << byte_start <<"," <<byte_end <<"\n";
     std::vector<uint8_t> ret = { data.begin() + byte_start, data.begin() + byte_end };
-    std::cout << "returning vector " << this->name << " data size =" << ret.size() <<"\n";
     return ret;
 }
 
@@ -151,7 +149,6 @@ std::vector<uint8_t> ModifierFunction::applyOperation(std::vector<uint8_t> data,
     T value = convertDataToType<T>(data);
     value = operation(value, static_cast<T>(argument1));  // Apply the bitwise operation using the passed operation
     copyTypeToData(value, data);
-    std::cout << "returning vector " << this->name << "\n";
     return data;
 }
 
@@ -210,13 +207,26 @@ std::vector<uint8_t> ModifierFunction::modifierBitShift(std::vector<uint8_t> dat
 
 template<typename T>
 T ModifierFunction::convertDataToType(const std::vector<uint8_t>& data) {
-    T value = 0;
-    std::memcpy(&value, data.data(), data.size());
-    return value;
+    switch (data.size()) {
+      case sizeof(uint8_t):
+        return *(uint8_t*)data.data();
+      case sizeof(uint16_t):
+        return *(uint16_t*)data.data();
+      case sizeof(uint32_t):
+        return *(uint32_t*)data.data();
+      case sizeof(uint64_t):
+        return *(uint64_t*)data.data();
+      default:
+        throw std::runtime_error("data must be exactly the size of a default "
+                                "integer type (1,2,4 or 8 bytes)");
+    }
 }
 
 template<typename T>
 void ModifierFunction::copyTypeToData(T value, std::vector<uint8_t>& data) {
+  if (data.size() != sizeof(T)) {
+    std::cout<< "copyTypeToData:Data size " << data.size() << "does not match the size of the type "<<sizeof(T) << std::endl;
+  }
     std::memcpy(data.data(), &value, sizeof(T));
 }
 

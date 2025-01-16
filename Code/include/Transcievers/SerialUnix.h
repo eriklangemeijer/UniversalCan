@@ -8,7 +8,7 @@
 #include <mutex>
 #include <atomic>
 
-class SerialMacOS : public ISerial {
+class SerialUnix : public ISerial {
 private:
     void readLoop();
 
@@ -19,8 +19,8 @@ private:
     std::function<void(std::vector<uint8_t>)> callbackPtr;
     void threadFunction();
 public:
-    SerialMacOS();
-    ~SerialMacOS();
+    SerialUnix();
+    ~SerialUnix();
 
     bool open(const std::string& port) override;
     void close() override;

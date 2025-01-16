@@ -9,8 +9,8 @@ set(UniversalCan_SRC
 )
 if(WIN32)
     list(APPEND UniversalCan_SRC Transcievers/SerialWindows.cpp)
-elseif(APPLE)
-    list(APPEND UniversalCan_SRC Transcievers/SerialMacOS.cpp)
+else()
+    list(APPEND UniversalCan_SRC Transcievers/SerialUnix.cpp)
 endif()
 # Form the full path to the source files...
 PREPEND(UniversalCan_SRC)

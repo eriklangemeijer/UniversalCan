@@ -108,7 +108,7 @@ void SerialWindows::registerCallback(std::function<void(std::vector<uint8_t>)> c
 void SerialWindows::threadFunction() {
     OVERLAPPED ov = { 0 };
     ov.hEvent = CreateEvent(0, true, 0, 0);
-    std::string string_buffer;
+    std::vector<uint8_t> rolling_buffer;
     while (this->running) {
         WaitCommEvent(comPort, NULL, &ov);
         if (WaitForSingleObject(ov.hEvent, INFINITE) == WAIT_OBJECT_0) {
@@ -118,13 +118,13 @@ void SerialWindows::threadFunction() {
             if(bytes_read > 0) {
                 for(uint8_t character : buffer) {
                     if(character == '\r') {   
-                        if(!(string_buffer.empty())) { 
-                            this->callbackPtr(std::move(string_buffer));
-                            string_buffer.clear();
+                        if(!(rolling_buffer.empty())) { 
+                            this->callbackPtr(rolling_buffer);
+                            rolling_buffer.clear();
                         }
                     }
                     else if(character != 0) {
-                        string_buffer.push_back(character);
+                        rolling_buffer.push_back(character);
                     }
                 }
             }
