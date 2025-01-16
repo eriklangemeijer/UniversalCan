@@ -2,7 +2,6 @@
 #include <CanValue.h>
 #include "CanValueTemplate.h"
 #include <cstdint>
-#include <stdexcept>
 #include <string>
 #include <vector>
 

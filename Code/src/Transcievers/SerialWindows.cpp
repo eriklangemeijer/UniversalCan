@@ -1,5 +1,15 @@
 #include <Transcievers/SerialWindows.h>
+#include <fileapi.h>
+#include <cstddef>
+#include <handleapi.h>
+#include <minwindef.h>
+#include <functional>
+#include <minwinbase.h>
 #include <stdexcept>
+#include <string>
+#include <winnt.h>
+#include <windows.h>
+#include <synchapi.h>
 
 SerialWindows::SerialWindows() 
     : comPort(INVALID_HANDLE_VALUE), running(false) {}
@@ -12,10 +22,10 @@ bool SerialWindows::open(const std::string& port) {
     comPort = CreateFileA(port.c_str(),
                           GENERIC_READ | GENERIC_WRITE,
                           0,
-                          NULL,
+                          nullptr,
                           OPEN_EXISTING,
                           FILE_ATTRIBUTE_NORMAL,
-                          NULL);
+                          nullptr);
     if (comPort == INVALID_HANDLE_VALUE) {
         return false;
     }
@@ -76,7 +86,7 @@ bool SerialWindows::write(const std::vector<uint8_t>& data) {
         return false;
     }
 
-    DWORD bytes_written;
+    DWORD bytes_written = 0;
     return WriteFile(comPort, data.data(), static_cast<DWORD>(data.size()), &bytes_written, NULL);
 }
 
@@ -107,10 +117,10 @@ void SerialWindows::registerCallback(std::function<void(std::vector<uint8_t>)> c
 
 void SerialWindows::threadFunction() {
     OVERLAPPED ov = { 0 };
-    ov.hEvent = CreateEvent(0, true, 0, 0);
+    ov.hEvent = CreateEvent(nullptr, true, 0, nullptr);
     std::vector<uint8_t> rolling_buffer;
     while (this->running) {
-        WaitCommEvent(comPort, NULL, &ov);
+        WaitCommEvent(comPort, nullptr, &ov);
         if (WaitForSingleObject(ov.hEvent, INFINITE) == WAIT_OBJECT_0) {
             std::vector<uint8_t> buffer(SERIAL_READ_BUFFER_SIZE); // Example buffer size
             unsigned long bytes_read = 0;

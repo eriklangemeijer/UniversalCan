@@ -1,5 +1,6 @@
-#include "CanMessageTemplate.h"
+#include <CanMessageTemplate.h>
 #include <CanMessage.h>
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <memory>
@@ -44,7 +45,7 @@ std::string CanMessage::to_string() {
         ss << ("\tValues:\n" );
         for(auto value : this->values) {
             ss << ("\t\t" + value.getValueName() + ":");
-            std::string data_type = value.getDataType();
+            std::string const data_type = value.getDataType();
             if(data_type == "bool") {
                 ss << (value.getBoolValue() ? "true" : "false");
             }

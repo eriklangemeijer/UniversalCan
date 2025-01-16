@@ -1,5 +1,4 @@
 #include "CanValueTemplate.h"
-#include <CanValue.h>
 #include <CanMessage.h>
 #include <CanMessageTemplate.h>
 #include <ProtocolDefinitionParser.h>
