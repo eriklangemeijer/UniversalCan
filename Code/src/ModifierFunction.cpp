@@ -117,7 +117,7 @@ ModifierFunction::ModifierFunction(pugi::xml_node operation)
 std::vector<uint8_t> ModifierFunction::modifierSelectByte(std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
     auto const byte_start = convertDataToType<uint16_t>(args[0].call(data));
     auto const byte_end = convertDataToType<uint16_t>(args[1].call(data));
-    if (byte_start > byte_end || (byte_end - byte_start) > max_value_size) {
+    if (byte_start >= byte_end || (byte_end - byte_start) > max_value_size) {
         throw std::runtime_error("byte_start must be smaller than byte_end");
     }
     std::vector<uint8_t> ret = {data.begin() + byte_start, data.begin() + byte_end};
@@ -134,8 +134,10 @@ std::vector<uint8_t> ModifierFunction::applyOperation(std::vector<uint8_t> data,
 
 template <typename Op>
 std::vector<uint8_t> ModifierFunction::callOperationForDatatype(std::vector<uint8_t> data, std::vector<ModifierFunction> args, Op operation) {
-
-    std::vector<uint8_t> const input_value = args[0].call(data);
+    if (args.size() < 2) {
+        throw std::runtime_error("Insufficient arguments provided");
+    }
+    std::vector<uint8_t> const &input_value = args[0].call(data);
     auto const argument1 = convertDataToType<uint16_t>(args[1].call(data));
     switch (input_value.size()) {
     case sizeof(uint8_t):
@@ -165,6 +167,9 @@ std::vector<uint8_t> ModifierFunction::applyBitShift(std::vector<uint8_t> data, 
 }
 
 std::vector<uint8_t> ModifierFunction::modifierBitShift(std::vector<uint8_t> data, std::vector<ModifierFunction> args, bool isLeftShift) {
+    if (args.size() < 2) {
+        throw std::runtime_error("modifierBitShift requires at least 2 arguments");
+    }
 
     std::vector<uint8_t> const value_to_shift = args[0].call(data);
     auto const nr_bits = convertDataToType<uint16_t>(args[1].call(data));
@@ -209,5 +214,9 @@ void ModifierFunction::copyTypeToData(T value, std::vector<uint8_t> &data) {
 }
 
 std::vector<uint8_t> ModifierFunction::call(std::vector<uint8_t> can_data) {
+    if (this->function) {
     return this->function(can_data, this->arguments);
+    } else {
+        throw std::runtime_error("Function is not initialized");
+    }
 }
