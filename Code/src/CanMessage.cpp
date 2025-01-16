@@ -1,4 +1,4 @@
-#include "CanMessageTemplate.h"
+#include <CanMessageTemplate.h>
 #include <CanMessage.h>
 #include <cstddef>
 #include <cstdint>
