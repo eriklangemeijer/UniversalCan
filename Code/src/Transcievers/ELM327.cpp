@@ -50,10 +50,7 @@ void ELM327::serialReceiveCallback(std::vector<uint8_t> message) {
 
 bool ELM327::sendMessage(std::vector<CanMessage> messages) {
     for (const auto& msg : messages) {
-      std::vector<uint8_t> const data(reinterpret_cast<const uint8_t*>(&msg),
-                                      reinterpret_cast<const uint8_t*>(&msg) +
-                                        sizeof(msg));
-      if (!serial->write(data)) {
+      if (!serial->write(msg.data)) {
         return false;
         }
     }
@@ -88,7 +85,7 @@ void ELM327::registerCallback(std::function<void(CanMessage)> callback) {
 
 bool ELM327::messageAvailable() {
     this->messageListLock.lock();
-    bool const available = this->messageList.size() > 0;
+    bool const available = !this->messageList.empty();
     this->messageListLock.unlock();
     return available;
 }
@@ -103,9 +100,9 @@ void ELM327::storeMessage(CanMessage& message) {
 std::shared_ptr<CanMessage> ELM327::readMessage() {
     std::shared_ptr<CanMessage> message = nullptr;
     this->messageListLock.lock();
-    if(this->messageList.size() > 0) {
-        message = std::make_unique<CanMessage>(this->messageList.front());
-        this->messageList.pop_front();
+    if (!this->messageList.empty()) {
+      message = std::make_unique<CanMessage>(this->messageList.front());
+      this->messageList.pop_front();
     }
     this->messageListLock.unlock();
     return message;

@@ -9,13 +9,13 @@
 
 CanMessageTemplate::CanMessageTemplate(pugi::xml_node& msg) {
     name = msg.attribute("Name").as_string();
-    description = msg.attribute("Description").as_string();   
-  
-    for (auto value = msg.child("Values").child("Value"); value; value = value.next_sibling("Value")) {
-        value_list.emplace_back(value);
+    description = msg.attribute("Description").as_string();
+
+    for (auto value = msg.child("Values").child("Value"); value != nullptr;
+         value = value.next_sibling("Value")) {
+      value_list.emplace_back(value);
     }
 
-    
     filter_function = std::make_shared<ModifierFunction>(msg.child("FILTER_FUNCTION").first_child());
 
 }
@@ -24,7 +24,7 @@ bool CanMessageTemplate::isMatch(std::vector<uint8_t> can_data)
 {   
     std::vector<uint8_t> result = this->filter_function->call(can_data);
     if(result.size() == 1) {
-        return (result.data()[0] == 1);
+      return (result[0] == 1);
     }
     throw std::runtime_error("not size bool");
 }

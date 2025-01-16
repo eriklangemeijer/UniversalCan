@@ -1,11 +1,11 @@
 #include "CanMessageTemplate.h"
-#include "CanValueTemplate.h"
 #include <ProtocolDefinitionParser.h>
-#include <stdlib.h>
+#include <_stdlib.h>
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
 #include <list>
+#include <array>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -14,16 +14,22 @@
 ProtocolDefinitionParser::ProtocolDefinitionParser(std::string filename) {
     pugi::xml_document doc;
     pugi::xml_parse_result const result = doc.load_file(filename.c_str());
-    if (!result)
-        throw std::runtime_error("Cannot open protocol file");
+    if (!result) {
+      throw std::runtime_error("Cannot open protocol file");
+    }
 
-    for (auto message = doc.child("ProtocolDefintion").child("Message"); message; message = message.next_sibling("Message")) {
+    for (auto message = doc.child("ProtocolDefintion").child("Message");
+         message != nullptr;
+         message = message.next_sibling("Message")) {
       message_list.emplace_back(message);
     }
 
     std::string const base_path = getParentPath(canonicalizePath(filename));
 
-    for (auto included_document = doc.child("ProtocolDefintion").child("include"); included_document; included_document = included_document.next_sibling("include")) {
+    for (auto included_document =
+           doc.child("ProtocolDefintion").child("include");
+         included_document != nullptr;
+         included_document = included_document.next_sibling("include")) {
       std::string const relative_path =
         included_document.attribute("path").as_string();
 
@@ -39,17 +45,18 @@ ProtocolDefinitionParser::ProtocolDefinitionParser(std::string filename) {
 }
 
 std::string ProtocolDefinitionParser::canonicalizePath(const std::string& path) {
-    char resolved_path[4096];
+    const uint16_t max_path_length = 4096;
+    std::array<char, max_path_length> resolved_path = {0};
 #ifdef _WIN32
     if (_fullpath(resolved_path, path.c_str(), sizeof(resolved_path)) == nullptr) {
         throw std::runtime_error("Failed to resolve path: " + path);
     }
 #else
-    if (realpath(path.c_str(), resolved_path) == nullptr) {
+    if (realpath(path.c_str(), resolved_path.data()) == nullptr) {
         throw std::runtime_error("Failed to resolve path: " + path);
     }
 #endif
-    return { resolved_path };
+    return { resolved_path.data() };
 }
 
 std::string ProtocolDefinitionParser::getParentPath(const std::string& path) {

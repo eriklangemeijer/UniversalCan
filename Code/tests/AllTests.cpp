@@ -1,5 +1,4 @@
 #include "CanValueTemplate.h"
-#include <CanValue.h>
 #include <CanMessage.h>
 #include <CanMessageTemplate.h>
 #include <ProtocolDefinitionParser.h>
@@ -48,11 +47,9 @@ TEST(M01EngSpdResponse, add)
             </Message>";
 
     pugi::xml_document doc;
-    pugi::xml_parse_result const result =
-      doc.load_string(mode1_veh_spd_template_str.c_str());
+    doc.load_string(mode1_veh_spd_template_str.c_str());
     pugi::xml_node msg = doc.child("Message");
-    std::shared_ptr<CanMessageTemplate> const mode1_veh_spd_template =
-      std::make_shared<CanMessageTemplate>(msg);
+    std::shared_ptr<CanMessageTemplate> const mode1_veh_spd_template = std::make_shared<CanMessageTemplate>(msg);
     CanMessage response_0kph = CanMessage({mode1_response_id, mode1_veh_spd_id, 0}, mode1_veh_spd_template);
     GTEST_ASSERT_EQ(response_0kph.values[0].getValue<uint8_t>(), 0);
     CanMessage response_60kph = CanMessage({mode1_response_id, mode1_veh_spd_id, 60}, mode1_veh_spd_template);

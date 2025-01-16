@@ -1,8 +1,7 @@
 
-#include <CanValue.h>
 #include "CanValueTemplate.h"
+#include <CanValue.h>
 #include <cstdint>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -28,5 +27,5 @@ std::string CanValue::getDataType() const
 
 bool CanValue::getBoolValue() const
 {
-    return value[0];
+  return value[0] != 0;
 }

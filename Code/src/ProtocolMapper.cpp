@@ -18,13 +18,6 @@
 #include <iostream>
 #include <memory>
 
-static void
-canMessageReceiveCallback(std::string message)
-{
-  if (message == "ELM327 v2.0\r\r>" or message == "ELM327 v1.3a\r\r>") {
-    return;
-  }
-}
 
 int main() {
     try {

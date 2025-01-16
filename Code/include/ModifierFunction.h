@@ -15,12 +15,15 @@ class ModifierFunction
         
         
         template<typename T> std::vector<uint8_t> applyBitShift(std::vector<uint8_t> data, uint64_t nr_bits, bool isLeftShift);
-        template<typename T, typename Op> std::vector<uint8_t> applyOperation(std::vector<uint8_t> data, T B, Op operation);
+        template<typename T, typename Op>
+        std::vector<uint8_t> applyOperation(std::vector<uint8_t> data,
+                                            T argument1,
+                                            Op operation);
         template<typename T> void copyTypeToData(T value, std::vector<uint8_t>& data);
         template<typename T> T convertDataToType(const std::vector<uint8_t>& data);
     public:
         ModifierFunction(pugi::xml_attribute attribute);
-        ModifierFunction(pugi::xml_node template_description);
+        ModifierFunction(pugi::xml_node operation);
         std::vector<uint8_t> modifierSelectByte(std::vector<uint8_t> data, std::vector<ModifierFunction> args);
         template<typename Op> std::vector<uint8_t> callOperationForDatatype(std::vector<uint8_t> data, std::vector<ModifierFunction> args, Op operation);
         std::vector<uint8_t> modifierBitShift(std::vector<uint8_t> data, std::vector<ModifierFunction> args, bool isLeftShift);
