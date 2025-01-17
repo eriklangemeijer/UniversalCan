@@ -3,12 +3,14 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(UniversalCan_TEST_SRC
     AllTests.cpp
+    ModifierFunctionTests.cpp
 )
 set(UniversalCan_TEST_HEADER
 )
 PREPEND(UniversalCan_TEST_SRC)
 list(APPEND UniversalCan_TEST_HEADER ${UniversalCan_INC})
 
+include(CTest)
 include(GoogleTest)
 add_executable(TestUniversalCan ${UniversalCan_TEST_SRC} ${UniversalCan_SRC} ${UniversalCan_TEST_HEADER})
 

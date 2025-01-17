@@ -14,7 +14,7 @@ const uint8_t mode1_response_id = 0x41;
 /* Mode 1 messages can be used to request live data. 
    This test verifies how responses to these messages are parsed by the template
    In this test vehicle speed response is checked which is stored directly in the message in kph */
-TEST(M01EngSpdResponse, add)
+TEST(MessageParsing, M01EngSpdResponse)
 {
     std::string const mode1_veh_spd_template_str =
             "<Message Name=\"M01VehicleSpeed\" Description=\"Mode $01 response for VehicleSpeed\">\
@@ -58,7 +58,7 @@ TEST(M01EngSpdResponse, add)
     GTEST_ASSERT_EQ(response_120kph.values[0].getValue<uint8_t>(), 120);
 }
 
-TEST(M01PIDSupportResponse, add)
+TEST(MessageParsing, M01PIDSupportResponse)
 {
     const uint8_t mode1_supp_pid = 0x00;
     ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../../ProtocolDefinitions/J1979.xml");
@@ -77,14 +77,14 @@ TEST(M01PIDSupportResponse, add)
     
 }
 
-TEST(IncludeRelativeFile, add)
+TEST(ProtocolDefinitionParser, IncludeRelativeFile)
 {
     const uint8_t mode1_supp_pid = 0x00;
     ProtocolDefinitionParser const parser =
                         ProtocolDefinitionParser("../../../ProtocolDefinitions/bmw_motorrad.xml");
 }
 
-TEST(findTemplate, add)
+TEST(ProtocolDefinitionParser, findTemplate)
 {
     ProtocolDefinitionParser parser =
                         ProtocolDefinitionParser("../../../ProtocolDefinitions/J1979.xml");
