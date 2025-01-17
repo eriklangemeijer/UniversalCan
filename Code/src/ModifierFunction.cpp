@@ -7,13 +7,25 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
+#include <limits>
 const uint8_t max_value_size = 8;
 
 ModifierFunction::ModifierFunction(pugi::xml_attribute attribute) {
     int const const_value = attribute.as_int();
     function = ([this, const_value](std::vector<uint8_t>, std::vector<ModifierFunction>) {
-        std::vector<uint8_t> value = std::vector<uint8_t>(sizeof(const_value));
+        uint8_t value_size = 0;
+        if(const_value <= std::numeric_limits<uint8_t>::max()) {
+            value_size = sizeof(uint8_t);
+        } else if(const_value <= std::numeric_limits<uint16_t>::max()) {
+            value_size = sizeof(uint16_t);
+        } else if(const_value <= std::numeric_limits<uint32_t>::max()) {
+            value_size = sizeof(uint32_t);
+        } else if(const_value <= std::numeric_limits<uint64_t>::max()) {
+            value_size = sizeof(uint64_t);
+        } else {
+            throw std::runtime_error("Value is too large");
+        }
+        std::vector<uint8_t> value = std::vector<uint8_t>(value_size);
         copyTypeToData(const_value, value);
         return value;
     });
@@ -44,11 +56,6 @@ ModifierFunction::ModifierFunction(pugi::xml_node operation)
         function =
             ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
                 return modifierSelectByte(data, args);
-            });
-    } else if (strcmp(operation.name(), "GAIN") == 0) {
-        function =
-            ([this](std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
-                return callOperationForDatatype(data, args, std::multiplies<>());
             });
     } else if (strcmp(operation.name(), "BITWISE_OR") == 0) {
         function =
@@ -110,7 +117,7 @@ ModifierFunction::ModifierFunction(pugi::xml_node operation)
         });
 
     } else {
-        std::cout << "Unsupported function " << operation.name() << std::endl;
+        throw std::runtime_error("Unsupported function " + std::string(operation.name()) + "\n");
     }
 }
 
@@ -198,14 +205,14 @@ std::vector<uint8_t> ModifierFunction::modifierBitShift(std::vector<uint8_t> dat
 template <typename T>
 T ModifierFunction::convertDataToType(const std::vector<uint8_t> &data) {
     switch (data.size()) {
-    case sizeof(uint8_t):
-        return static_cast<uint8_t>(*data.data());
-    case sizeof(uint16_t):
-        return static_cast<uint16_t>(*data.data());
-    case sizeof(uint32_t):
-        return static_cast<uint32_t>(*data.data());
-    case sizeof(uint64_t):
-        return static_cast<uint64_t>(*data.data());
+        case sizeof(uint8_t):
+            return *((uint8_t*)(data.data()));
+        case sizeof(uint16_t):
+            return *((uint16_t*)(data.data()));
+        case sizeof(uint32_t):
+            return *((uint32_t*)(data.data()));
+        case sizeof(uint64_t):
+            return *((uint64_t*)(data.data()));
     default:
         throw std::runtime_error("data must be exactly the size of a default "
                                  "integer type (1,2,4 or 8 bytes)");
@@ -214,10 +221,8 @@ T ModifierFunction::convertDataToType(const std::vector<uint8_t> &data) {
 
 template <typename T>
 void ModifierFunction::copyTypeToData(T value, std::vector<uint8_t> &data) {
-    if (data.size() != sizeof(T)) {
-        std::cout << "copyTypeToData:Data size " << data.size() << "does not match the size of the type " << sizeof(T) << std::endl;
-    }
-    std::memcpy(data.data(), &value, sizeof(T));
+    T temp_value = (T)(value);
+    std::memcpy(data.data(), &temp_value, sizeof(T));
 }
 
 std::vector<uint8_t> ModifierFunction::call(std::vector<uint8_t> can_data) {

@@ -15,6 +15,28 @@ std::shared_ptr<ModifierFunction> InitModifierFunction(const std::string& xml_st
 
 }
 
+TEST(ModifierFunction, UnsupportedFunction) {
+    const uint8_t test_value = 0xFA;
+    std::string const template_str =
+        "<FOOBAR></FOOBAR>";
+
+    pugi::xml_document doc;
+    doc.load_string(template_str.c_str());
+    pugi::xml_node function_xml = doc.first_child();
+    EXPECT_THROW({
+        try
+        {
+            auto function = ModifierFunction(function_xml);
+        }
+        catch( const std::runtime_error& e )
+        {
+            EXPECT_STREQ("Unsupported function FOOBAR\n", e.what() );
+            throw;
+        }
+    }, std::runtime_error);
+}
+
+
 TEST(ModifierFunctionByteSelect, OneByteOk) {
     const uint8_t test_value = 0xFA;
     std::string const template_str =
@@ -104,6 +126,20 @@ TEST(ModifierFunctionByteSelect, OutOfRange) {
     auto function = InitModifierFunction(template_str);
     FunctionCallExpectedError(function, "Selection is out of range", {0});
 }
+
+TEST(ModifierFunctionMultiply, TwoConstants) {
+    const uint8_t test_value = 6;
+    std::string const template_str =
+        "<MULTIPLY>\
+            <CONSTANT value=\"3\"/>\
+            <CONSTANT value=\"2\"/>\
+        </MULTIPLY>";
+
+    std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
+    std::vector<uint8_t> ret_value = function->call({0, test_value, 0});
+    GTEST_ASSERT_EQ(ret_value[0], test_value);
+}
+
 
 
 
