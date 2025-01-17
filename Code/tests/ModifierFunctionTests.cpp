@@ -7,6 +7,7 @@
 
 #include <ModifierFunction.h>
 
+/* Function used to simplify creation of a ModifierFunction object based on an xml string. */
 std::shared_ptr<ModifierFunction> InitModifierFunction(const std::string &xml_str) {
     pugi::xml_document doc;
     doc.load_string(xml_str.c_str());
@@ -14,6 +15,21 @@ std::shared_ptr<ModifierFunction> InitModifierFunction(const std::string &xml_st
     return std::make_shared<ModifierFunction>(function_xml);
 }
 
+/* Function used to simplify testing function calls that should result in runtime_errors */
+void FunctionCallExpectedError(std::shared_ptr<ModifierFunction> function, const std::string expected_error_string, const std::vector<uint8_t> &input = {0, 0, 0}) {
+    EXPECT_THROW({
+        try
+        {
+            function->call(input);
+        }
+        catch( const std::runtime_error& e )
+        {
+            EXPECT_STREQ(expected_error_string.c_str(), e.what() );
+            throw;
+        } }, std::runtime_error);
+}
+
+/* Test to verify behaviour when a ModifierFunction is created with an unsupported name*/
 TEST(ModifierFunction, UnsupportedFunction) {
     const uint8_t test_value = 0xFA;
     std::string const template_str =
@@ -34,6 +50,8 @@ TEST(ModifierFunction, UnsupportedFunction) {
         } }, std::runtime_error);
 }
 
+/* Test to verify the BYTE_SELECT function using constant values.
+    A single byte is selected.*/
 TEST(ModifierFunctionByteSelect, OneByteOk) {
     const uint8_t test_value = 0xFA;
     std::string const template_str =
@@ -48,6 +66,8 @@ TEST(ModifierFunctionByteSelect, OneByteOk) {
     GTEST_ASSERT_EQ(ret_value[0], test_value);
 }
 
+/* Test to verify the BYTE_SELECT function using constant values
+    An array of bytes is selected.*/
 TEST(ModifierFunctionByteSelect, MultiByteOk) {
     const uint8_t test_value = 0xFA;
     const uint8_t nr_values = 4;
@@ -72,18 +92,6 @@ TEST(ModifierFunctionByteSelect, MultiByteOk) {
     }
 }
 
-void FunctionCallExpectedError(std::shared_ptr<ModifierFunction> function, const std::string expected_error_string, const std::vector<uint8_t> &input = {0, 0, 0}) {
-    EXPECT_THROW({
-        try
-        {
-            function->call(input);
-        }
-        catch( const std::runtime_error& e )
-        {
-            EXPECT_STREQ(expected_error_string.c_str(), e.what() );
-            throw;
-        } }, std::runtime_error);
-}
 
 TEST(ModifierFunctionByteSelect, NoArgs) {
     std::string const template_str =

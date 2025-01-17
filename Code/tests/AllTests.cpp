@@ -11,6 +11,7 @@
 
 const uint8_t mode1_veh_spd_id = 0x0D;
 const uint8_t mode1_response_id = 0x41;
+
 /* Mode 1 messages can be used to request live data. 
    This test verifies how responses to these messages are parsed by the template
    In this test vehicle speed response is checked which is stored directly in the message in kph */
@@ -58,6 +59,8 @@ TEST(MessageParsing, M01EngSpdResponse)
     GTEST_ASSERT_EQ(response_120kph.values[0].getValue<uint8_t>(), 120);
 }
 
+/*In this test PID Support response is checked which stores a bitmap with supported PID's. 
+  Reference values come from wikipedia article */
 TEST(MessageParsing, M01PIDSupportResponse)
 {
     const uint8_t mode1_supp_pid = 0x00;
@@ -77,20 +80,26 @@ TEST(MessageParsing, M01PIDSupportResponse)
     
 }
 
-TEST(ProtocolDefinitionParser, IncludeRelativeFile)
-{
-    const uint8_t mode1_supp_pid = 0x00;
-    ProtocolDefinitionParser const parser =
-                        ProtocolDefinitionParser("../../../ProtocolDefinitions/bmw_motorrad.xml");
-}
-
+/* This test shows how a message can be found using its filter function. 
+   This is neccessary to identify the template matching a message.*/
 TEST(ProtocolDefinitionParser, findTemplate)
 {
-    ProtocolDefinitionParser parser =
-                        ProtocolDefinitionParser("../../../ProtocolDefinitions/J1979.xml");
+    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../../ProtocolDefinitions/J1979.xml");
     std::vector<uint8_t> const msg_data = { mode1_response_id,
                                             mode1_veh_spd_id,
                                             0 };
+    auto msg_template = parser.findMatch(msg_data);
+    GTEST_ASSERT_TRUE(strcmp(msg_template->getName().c_str(), "M01VehicleSpeed") == 0);
+}
+
+/* This test shows how messages can defined in subfiles. This way protocols can include messages from other protocols.*/
+TEST(ProtocolDefinitionParser, IncludeRelativeFile)
+{
+    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../../ProtocolDefinitions/bmw_motorrad.xml");
+    std::vector<uint8_t> const msg_data = { mode1_response_id,
+                                            mode1_veh_spd_id,
+                                            0 };
+    // Message is only defined in J1979.xml which is included by filename in bmw_motorrad.xml
     auto msg_template = parser.findMatch(msg_data);
     GTEST_ASSERT_TRUE(strcmp(msg_template->getName().c_str(), "M01VehicleSpeed") == 0);
 }
