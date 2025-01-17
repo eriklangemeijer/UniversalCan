@@ -136,9 +136,68 @@ TEST(ModifierFunctionMultiply, TwoConstants) {
         </MULTIPLY>";
 
     std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
-    std::vector<uint8_t> ret_value = function->call({0, test_value, 0});
+    std::vector<uint8_t> ret_value = function->call({0});
     GTEST_ASSERT_EQ(ret_value[0], test_value);
 }
+
+TEST(ModifierFunctionMultiply, TwoLargeConstants) {
+    const uint32_t test_value = 9999*2222;
+    std::string const template_str =
+        "<MULTIPLY>\
+            <CONSTANT value=\"9999\"/>\
+            <CONSTANT value=\"2222\"/>\
+        </MULTIPLY>";
+
+    std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
+    std::vector<uint8_t> ret_value = function->call({0});
+    uint32_t ret_int = *((uint32_t*)ret_value.data());
+    GTEST_ASSERT_EQ(ret_int, test_value);
+}
+
+TEST(ModifierFunctionMultiply, OneConstantOneByteSelect) {
+    const uint8_t test_value = 6;
+    std::string const template_str =
+        "<MULTIPLY>\
+            <CONSTANT value=\"3\"/>\
+            <BYTE_SELECT>\
+                <CONSTANT value=\"1\"/>\
+                <CONSTANT value=\"2\"/>\
+            </BYTE_SELECT>\
+        </MULTIPLY>";
+
+    std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
+    std::vector<uint8_t> ret_value = function->call({0, test_value, 0});
+    GTEST_ASSERT_EQ(ret_value[0], test_value*3);
+}
+
+TEST(ModifierFunctionMultiply, InlineConstant) {
+    const uint32_t test_value = 9999*2222;
+    std::string const template_str =
+        "<MULTIPLY arg1=\"9999\">\
+            <CONSTANT value=\"2222\"/>\
+        </MULTIPLY>";
+
+    std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
+    std::vector<uint8_t> ret_value = function->call({0});
+    uint32_t ret_int = *((uint32_t*)ret_value.data());
+    GTEST_ASSERT_EQ(ret_int, test_value);
+}
+TEST(ModifierFunctionMultiply, TwoInlineConstant) {
+    const uint32_t test_value = 9999*2222;
+    std::string const template_str =
+        "<MULTIPLY arg1=\"9999\" arg2=\"2222\">\
+        </MULTIPLY>";
+
+    std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
+    std::vector<uint8_t> ret_value = function->call({0});
+    uint32_t ret_int = *((uint32_t*)ret_value.data());
+    GTEST_ASSERT_EQ(ret_int, test_value);
+}
+
+
+
+
+
 
 
 

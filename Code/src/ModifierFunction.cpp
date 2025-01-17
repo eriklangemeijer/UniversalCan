@@ -12,20 +12,8 @@ const uint8_t max_value_size = 8;
 
 ModifierFunction::ModifierFunction(pugi::xml_attribute attribute) {
     int const const_value = attribute.as_int();
-    function = ([this, const_value](std::vector<uint8_t>, std::vector<ModifierFunction>) {
-        uint8_t value_size = 0;
-        if(const_value <= std::numeric_limits<uint8_t>::max()) {
-            value_size = sizeof(uint8_t);
-        } else if(const_value <= std::numeric_limits<uint16_t>::max()) {
-            value_size = sizeof(uint16_t);
-        } else if(const_value <= std::numeric_limits<uint32_t>::max()) {
-            value_size = sizeof(uint32_t);
-        } else if(const_value <= std::numeric_limits<uint64_t>::max()) {
-            value_size = sizeof(uint64_t);
-        } else {
-            throw std::runtime_error("Value is too large");
-        }
-        std::vector<uint8_t> value = std::vector<uint8_t>(value_size);
+    function = ([this, const_value](std::vector<uint8_t>, std::vector<ModifierFunction>) {    
+        std::vector<uint8_t> value = std::vector<uint8_t>(sizeof(const_value));
         copyTypeToData(const_value, value);
         return value;
     });
