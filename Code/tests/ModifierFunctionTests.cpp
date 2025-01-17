@@ -7,12 +7,11 @@
 
 #include <ModifierFunction.h>
 
-std::shared_ptr<ModifierFunction> InitModifierFunction(const std::string& xml_str) {
+std::shared_ptr<ModifierFunction> InitModifierFunction(const std::string &xml_str) {
     pugi::xml_document doc;
     doc.load_string(xml_str.c_str());
     pugi::xml_node function_xml = doc.first_child();
-    return std::make_unique<ModifierFunction>(function_xml);
-
+    return std::make_shared<ModifierFunction>(function_xml);
 }
 
 TEST(ModifierFunction, UnsupportedFunction) {
@@ -32,10 +31,8 @@ TEST(ModifierFunction, UnsupportedFunction) {
         {
             EXPECT_STREQ("Unsupported function FOOBAR\n", e.what() );
             throw;
-        }
-    }, std::runtime_error);
+        } }, std::runtime_error);
 }
-
 
 TEST(ModifierFunctionByteSelect, OneByteOk) {
     const uint8_t test_value = 0xFA;
@@ -75,7 +72,7 @@ TEST(ModifierFunctionByteSelect, MultiByteOk) {
     }
 }
 
-void FunctionCallExpectedError(std::shared_ptr<ModifierFunction> function, const std::string expected_error_string, const std::vector<uint8_t>& input = {0, 0, 0}) {
+void FunctionCallExpectedError(std::shared_ptr<ModifierFunction> function, const std::string expected_error_string, const std::vector<uint8_t> &input = {0, 0, 0}) {
     EXPECT_THROW({
         try
         {
@@ -85,8 +82,7 @@ void FunctionCallExpectedError(std::shared_ptr<ModifierFunction> function, const
         {
             EXPECT_STREQ(expected_error_string.c_str(), e.what() );
             throw;
-        }
-    }, std::runtime_error);
+        } }, std::runtime_error);
 }
 
 TEST(ModifierFunctionByteSelect, NoArgs) {
@@ -141,7 +137,7 @@ TEST(ModifierFunctionMultiply, TwoConstants) {
 }
 
 TEST(ModifierFunctionMultiply, TwoLargeConstants) {
-    const uint32_t test_value = 9999*2222;
+    const uint32_t test_value = 9999 * 2222;
     std::string const template_str =
         "<MULTIPLY>\
             <CONSTANT value=\"9999\"/>\
@@ -150,7 +146,7 @@ TEST(ModifierFunctionMultiply, TwoLargeConstants) {
 
     std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
     std::vector<uint8_t> ret_value = function->call({0});
-    uint32_t ret_int = *((uint32_t*)ret_value.data());
+    uint32_t ret_int = *((uint32_t *)ret_value.data());
     GTEST_ASSERT_EQ(ret_int, test_value);
 }
 
@@ -167,11 +163,11 @@ TEST(ModifierFunctionMultiply, OneConstantOneByteSelect) {
 
     std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
     std::vector<uint8_t> ret_value = function->call({0, test_value, 0});
-    GTEST_ASSERT_EQ(ret_value[0], test_value*3);
+    GTEST_ASSERT_EQ(ret_value[0], test_value * 3);
 }
 
 TEST(ModifierFunctionMultiply, InlineConstant) {
-    const uint32_t test_value = 9999*2222;
+    const uint32_t test_value = 9999 * 2222;
     std::string const template_str =
         "<MULTIPLY arg1=\"9999\">\
             <CONSTANT value=\"2222\"/>\
@@ -179,26 +175,28 @@ TEST(ModifierFunctionMultiply, InlineConstant) {
 
     std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
     std::vector<uint8_t> ret_value = function->call({0});
-    uint32_t ret_int = *((uint32_t*)ret_value.data());
+    uint32_t ret_int = *((uint32_t *)ret_value.data());
     GTEST_ASSERT_EQ(ret_int, test_value);
 }
 TEST(ModifierFunctionMultiply, TwoInlineConstant) {
-    const uint32_t test_value = 9999*2222;
+    const uint32_t test_value = 9999 * 2222;
     std::string const template_str =
         "<MULTIPLY arg1=\"9999\" arg2=\"2222\">\
         </MULTIPLY>";
 
     std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
     std::vector<uint8_t> ret_value = function->call({0});
-    uint32_t ret_int = *((uint32_t*)ret_value.data());
+    uint32_t ret_int = *((uint32_t *)ret_value.data());
     GTEST_ASSERT_EQ(ret_int, test_value);
 }
 
+TEST(ModifierFunctionMultiply, TwoInlineConstantShortNotation) {
+    const uint32_t test_value = 9999 * 2222;
+    std::string const template_str =
+        "<MULTIPLY arg1=\"9999\" arg2=\"2222\"/>";
 
-
-
-
-
-
-
-
+    std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
+    std::vector<uint8_t> ret_value = function->call({0});
+    uint32_t ret_int = *((uint32_t *)ret_value.data());
+    GTEST_ASSERT_EQ(ret_int, test_value);
+}
