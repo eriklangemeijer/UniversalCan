@@ -1,6 +1,6 @@
 #include "CanMessageTemplate.h"
 #include <ProtocolDefinitionParser.h>
-#include <_stdlib.h>
+#include <stdlib.h>
 #include <array>
 #include <cstdint>
 #include <cstdlib>
@@ -48,7 +48,7 @@ std::string ProtocolDefinitionParser::canonicalizePath(const std::string &path) 
     const uint16_t max_path_length = 4096;
     std::array<char, max_path_length> resolved_path = {0};
 #ifdef _WIN32
-    if (_fullpath(resolved_path, path.c_str(), sizeof(resolved_path)) == nullptr) {
+    if (_fullpath(resolved_path.data(), path.c_str(), sizeof(resolved_path)) == nullptr) {
         throw std::runtime_error("Failed to resolve path: " + path);
     }
 #else
