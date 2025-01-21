@@ -1,0 +1,65 @@
+Failed to open port: /dev/tty.usbserial-110
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  Failed to open serial port
+Received non-hex message: AT Z
+Received non-hex message: ELM327 v1.5
+Received non-hex message: >
+Received non-hex message: AT E0
+Received non-hex message: OK
+Received non-hex message: >
+Timeout waiting for response to Z
+Timeout waiting for response to E0
+Timeout waiting for response to L0
+Timeout waiting for response to SP0
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  Trying to send something that is not an AT command. To prevent self harm this is currently not possible
+Timeout waiting for response to Z
+Timeout waiting for response to E0
+Timeout waiting for response to L0
+Timeout waiting for response to SP0
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  Trying to send something that is not an AT command. To prevent self harm this is currently not possible
+Failed to open port: /dev/tty.usbserial-110
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  Failed to open serial port
+Failed to open port: /dev/tty.usbserial-110
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  Failed to open serial port
+Failed to open port: /dev/tty.usbserial-110
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  Failed to open serial port
+Received non-hex message: AT Z
+Received non-hex message: ELM327 v1.5
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  Trying to send something that is not an AT command. To prevent self harm this is currently not possible
+Received non-hex message: ELM327 v1.5
+Received non-hex message: >
+Received non-hex message: AT E0
+Received non-hex message: OK
+Received non-hex message: >
+Received non-hex message: K
+Received non-hex message: >
+Received non-hex message: ELM327 v1.5
+Received non-hex message: >
+Received non-hex message: AT E0
+Received non-hex message: OK
+Received non-hex message: >
+Received non-hex message: K
+Received non-hex message: >
+Received non-hex message: ELM327 v1.5
+Received non-hex message: >
+Received non-hex message: AT SP0
+Received non-hex message: OK
+Received non-hex message: >
+Received non-hex message: AT Z
+Received non-hex message: ELM327 v1.5
+Received non-hex message: >
+Received non-hex message: AT SP0
+Received non-hex message: OK
+Received non-hex message: >
+Received non-hex message: ½)H•„ûAT Z
+Received non-hex message: ELM327 v1.5
+Received non-hex message: >
+Received non-hex message: AT SP0
+Received non-hex message: OK
+Received non-hex message: >

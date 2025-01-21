@@ -19,11 +19,16 @@ CanMessageTemplate::CanMessageTemplate(pugi::xml_node &msg) {
 }
 
 bool CanMessageTemplate::isMatch(std::vector<uint8_t> can_data) {
-    std::vector<uint8_t> result = this->filter_function->call(can_data);
-    if (result.size() == 1) {
-        return (result[0] == 1);
+    try {
+        std::vector<uint8_t> result = this->filter_function->call(can_data);
+        if (result.size() == 1) {
+            return (result[0] == 1);
+        }
+        return false;
     }
-    throw std::runtime_error("not size bool");
+    catch (std::runtime_error &e) {
+        return false;
+    }
 }
 
 std::vector<CanValue>

@@ -7,7 +7,6 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <limits>
 const uint8_t max_value_size = 8;
 
 ModifierFunction::ModifierFunction(pugi::xml_attribute attribute) {
@@ -117,9 +116,11 @@ std::vector<uint8_t> ModifierFunction::modifierSelectByte(std::vector<uint8_t> d
     auto const byte_end = convertDataToType<uint16_t>(args[1].call(data));
     if (byte_start >= byte_end) {
         throw std::runtime_error("byte_start must be smaller than byte_end");
-    } else if ((byte_end - byte_start) > max_value_size) {
+    }
+    if ((byte_end - byte_start) > max_value_size) {
         throw std::runtime_error("Cannot select more than 8 bytes");
-    } else if ((byte_end) > data.size()) {
+    }
+    if ((byte_end) > data.size()) {
         throw std::runtime_error("Selection is out of range");
     }
     std::vector<uint8_t> ret = {data.begin() + byte_start, data.begin() + byte_end};
@@ -157,9 +158,9 @@ std::vector<uint8_t> ModifierFunction::callOperationForDatatype(std::vector<uint
 }
 
 template <typename T>
-std::vector<uint8_t> ModifierFunction::applyBitShift(std::vector<uint8_t> data, uint64_t nr_bits, bool isLeftShift) {
+std::vector<uint8_t> ModifierFunction::applyBitShift(std::vector<uint8_t> data, uint64_t nr_bits, bool is_left_shift) {
     T value = convertDataToType<T>(data);
-    if (isLeftShift) {
+    if (is_left_shift) {
         value <<= nr_bits;
     } else {
         value >>= nr_bits;
@@ -168,7 +169,7 @@ std::vector<uint8_t> ModifierFunction::applyBitShift(std::vector<uint8_t> data, 
     return data;
 }
 
-std::vector<uint8_t> ModifierFunction::modifierBitShift(std::vector<uint8_t> data, std::vector<ModifierFunction> args, bool isLeftShift) {
+std::vector<uint8_t> ModifierFunction::modifierBitShift(std::vector<uint8_t> data, std::vector<ModifierFunction> args, bool is_left_shift) {
     if (args.size() < 2) {
         throw std::runtime_error("modifierBitShift requires at least 2 arguments");
     }
@@ -177,13 +178,13 @@ std::vector<uint8_t> ModifierFunction::modifierBitShift(std::vector<uint8_t> dat
     auto const nr_bits = convertDataToType<uint16_t>(args[1].call(data));
     switch (value_to_shift.size()) {
     case sizeof(uint8_t):
-        return applyBitShift<uint8_t>(value_to_shift, nr_bits, isLeftShift);
+        return applyBitShift<uint8_t>(value_to_shift, nr_bits, is_left_shift);
     case sizeof(uint16_t):
-        return applyBitShift<uint16_t>(value_to_shift, nr_bits, isLeftShift);
+        return applyBitShift<uint16_t>(value_to_shift, nr_bits, is_left_shift);
     case sizeof(uint32_t):
-        return applyBitShift<uint32_t>(value_to_shift, nr_bits, isLeftShift);
+        return applyBitShift<uint32_t>(value_to_shift, nr_bits, is_left_shift);
     case sizeof(uint64_t):
-        return applyBitShift<uint64_t>(value_to_shift, nr_bits, isLeftShift);
+        return applyBitShift<uint64_t>(value_to_shift, nr_bits, is_left_shift);
     default:
         throw std::runtime_error("data must be exactly the size of a default "
                                  "integer type (1,2,4 or 8 bytes)");
@@ -209,14 +210,13 @@ T ModifierFunction::convertDataToType(const std::vector<uint8_t> &data) {
 
 template <typename T>
 void ModifierFunction::copyTypeToData(T value, std::vector<uint8_t> &data) {
-    T temp_value = (T)(value);
+    T temp_value = value;
     std::memcpy(data.data(), &temp_value, sizeof(T));
 }
 
 std::vector<uint8_t> ModifierFunction::call(std::vector<uint8_t> can_data) {
     if (this->function) {
     return this->function(can_data, this->arguments);
-    } else {
-        throw std::runtime_error("Function is not initialized");
     }
+    throw std::runtime_error("Function is not initialized");
 }

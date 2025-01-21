@@ -23,3 +23,7 @@ UniversalCan separates message definitions from communication software, enabling
 - Share protocol definition files with others.
 
 This approach fosters collaboration and reduces duplication of effort.
+
+
+## Previous work
+# [OBDGeek](https://sourceforge.net/projects/obdgeek/)

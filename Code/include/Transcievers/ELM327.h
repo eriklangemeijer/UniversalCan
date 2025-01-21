@@ -12,7 +12,7 @@ class ELM327 : public ITransciever {
     std::unique_ptr<ISerial> serial;
     std::unique_ptr<ProtocolDefinitionParser> protocol_parser;
     bool running;
-    std::function<void(CanMessage)> callbackFunction;
+    std::function<void(CanMessage&)> callbackFunction;
     void threadFunction();
     std::list<CanMessage> messageList;
     std::mutex messageListLock;
@@ -20,7 +20,8 @@ class ELM327 : public ITransciever {
     void storeMessage(CanMessage &message);
     bool ready;
 
-    bool sendATMessage(std::string command, bool waitForResponse = true);
+    bool sendATMessage(std::string command, bool wait_for_response = true);
+    static std::vector<uint8_t> hexStringToBytes(std::string message_str);
 
   public:
     explicit ELM327(std::unique_ptr<ISerial> serial, std::unique_ptr<ProtocolDefinitionParser> protocol_parser);
@@ -28,7 +29,7 @@ class ELM327 : public ITransciever {
 
     void start() override;
     bool sendMessage(std::vector<CanMessage> messages) override;
-    void registerCallback(std::function<void(CanMessage)> callback) override;
+    void registerCallback(std::function<void(CanMessage&)> callback) override;
     void serialReceiveCallback(std::vector<uint8_t> message);
     bool messageAvailable();
     std::shared_ptr<CanMessage> readMessage();

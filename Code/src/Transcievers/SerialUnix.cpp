@@ -1,15 +1,18 @@
+#include "Transcievers/ISerial.h"
 #include <Transcievers/SerialUnix.h>
+#include <chrono>
+#include <cstdint>
 #include <fcntl.h>
 #include <functional>
 #include <iostream>
 #include <mutex>
 #include <stdexcept>
 #include <string>
+#include <sys/_types/_ssize_t.h>
 #include <sys/fcntl.h>
 #include <termios.h>
 #include <thread>
 #include <unistd.h>
-#include <utility>
 #include <vector>
 
 SerialUnix::SerialUnix() : fd_(-1), running(false) {}
@@ -62,9 +65,9 @@ void SerialUnix::close() {
 }
 
 bool SerialUnix::writeString(std::string data) {
-    if (data.rfind("AT", 0) != 0) {
-        throw std::runtime_error("Trying to send something that is not an AT command. To prevent self harm this is currently not possible");
-    }
+    // if (data.rfind("AT", 0) != 0) {
+    //     throw std::runtime_error("Trying to send something that is not an AT command. To prevent self harm this is currently not possible");
+    // }
     // Convert the string to a vector of uint8_t
     std::vector<uint8_t> const byte_data(data.begin(), data.end());
 
@@ -85,22 +88,23 @@ bool SerialUnix::write(const std::vector<uint8_t> &data) {
 }
 
 std::string SerialUnix::read() {
-    std::lock_guard<std::mutex> const lock(mutex_);
+    throw std::runtime_error("Not implemented");
+    // std::lock_guard<std::mutex> const lock(mutex_);
 
-    if (fd_ == -1) {
-        std::cerr << "Port not open for reading." << std::endl;
-        return "";
-    }
-    std::vector<uint8_t> buffer(SERIAL_READ_BUFFER_SIZE); // Example buffer size
-    ssize_t const bytes_read = ::read(fd_, buffer.data(), buffer.size());
-    if (bytes_read <= 0) {
-        buffer.clear();
-        return "";
-    }
+    // if (fd_ == -1) {
+    //     std::cerr << "Port not open for reading." << std::endl;
+    //     return "";
+    // }
+    // std::vector<uint8_t> buffer(SERIAL_READ_BUFFER_SIZE); // Example buffer size
+    // ssize_t const bytes_read = ::read(fd_, buffer.data(), buffer.size());
+    // if (bytes_read <= 0) {
+    //     buffer.clear();
+    //     return "";
+    // }
 
-    buffer.resize(bytes_read);
-    std::string string_buffer(buffer.begin(), buffer.end());
-    return string_buffer;
+    // buffer.resize(bytes_read);
+    // std::string string_buffer(buffer.begin(), buffer.end());
+    // return string_buffer;
 }
 
 void SerialUnix::registerCallback(std::function<void(std::vector<uint8_t>)> callback) {
@@ -110,23 +114,21 @@ void SerialUnix::registerCallback(std::function<void(std::vector<uint8_t>)> call
 }
 
 void SerialUnix::threadFunction() {
-    std::vector<uint8_t> rolling_buffer(SERIAL_READ_BUFFER_SIZE);
+    std::vector<uint8_t> rolling_buffer;
 
     while (this->running) {
-        std::vector<uint8_t> read_buffer;
+        std::vector<uint8_t> read_buffer(SERIAL_READ_BUFFER_SIZE);
         ssize_t const bytes_read =
             ::read(fd_, read_buffer.data(), read_buffer.size());
         if (bytes_read > 0) {
-            if (bytes_read > 0) {
-                for (uint8_t const character : read_buffer) {
-                    if (character == '\r') {
-                        if (!(rolling_buffer.empty())) {
-                            this->callbackPtr(std::move(rolling_buffer));
-                            rolling_buffer.clear();
-                        }
-                    } else if (character != 0) {
-                        rolling_buffer.push_back(character);
+            for (uint8_t const character : read_buffer) {
+                if (character == '\r' || (!rolling_buffer.empty() && rolling_buffer.back() == '>')) {
+                    if (!(rolling_buffer.empty())) {
+                        this->callbackPtr(rolling_buffer);
+                        rolling_buffer.clear();
                     }
+                } else if (character != 0) {
+                    rolling_buffer.push_back(character);
                 }
             }
         } else {

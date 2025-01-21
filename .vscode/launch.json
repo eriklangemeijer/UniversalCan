@@ -5,6 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "ProtocolMapper: Debug MacOS",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/ProtocolMapper",
+            "preLaunchTask": "CMake: build",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "args" : ["/dev/tty.usbserial-110"]
+        },
+        {
             "name": "ProtocolMapper: Debug Windows",
             "type": "cppdbg",
             "request": "launch",

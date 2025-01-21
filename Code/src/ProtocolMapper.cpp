@@ -1,7 +1,6 @@
-#include <CanMessage.h>
 #include <ProtocolDefinitionParser.h>
 #include <Transcievers/ELM327.h>
-#include <exception>
+#include <iostream>
 #include <string>
 #include <utility>
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
@@ -14,17 +13,16 @@
 #include <Transcievers/SerialUnix.h>
 #endif
 
-#include <iostream>
 #include <memory>
 #include <regex>
 #include <stdexcept>
 
-bool isValidPortName(const std::string &port_name) {
+static bool isValidPortName(const std::string &port_name) {
 #ifdef _WIN32
     std::regex windows_regex("^COM[1-9][0-9]*$");
     return std::regex_match(port_name, windows_regex);
 #else
-    std::regex unix_regex("^/dev/tty\\..+$");
+    std::regex const unix_regex("^/dev/tty\\..+$");
     return std::regex_match(port_name, unix_regex);
 #endif
 }
@@ -35,7 +33,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    std::string port_name = argv[1];
+    std::string const port_name = argv[1];
 
     if (!isValidPortName(port_name)) {
         std::cerr << "Invalid port name: " << port_name << std::endl;
@@ -51,12 +49,9 @@ int main(int argc, char *argv[]) {
     if (!serial->open(port_name)) {
         throw std::runtime_error("Failed to open serial port");
     }
-    auto parser = std::make_unique<ProtocolDefinitionParser>("../../../ProtocolDefinitions/J1979.xml");
+    auto parser = std::make_unique<ProtocolDefinitionParser>("ProtocolDefinitions/J1979.xml");
     ELM327 elm327(std::move(serial), std::move(parser));
-    elm327.registerCallback([](const CanMessage & /*msg*/) {
-        // Handle incoming CAN message
-        std::cout << "Received CAN message\n";
-    });
+    
     elm327.start();
 
     while (true) {

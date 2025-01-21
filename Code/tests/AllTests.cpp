@@ -104,6 +104,7 @@ TEST(ProtocolDefinitionParser, IncludeRelativeFile)
     GTEST_ASSERT_TRUE(strcmp(msg_template->getName().c_str(), "M01VehicleSpeed") == 0);
 }
 
+
 int main(int argc, char* argv[])
 {
     ::testing::InitGoogleTest(&argc, argv);

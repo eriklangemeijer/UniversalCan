@@ -4,6 +4,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(UniversalCan_TEST_SRC
     AllTests.cpp
     ModifierFunctionTests.cpp
+    ELM327Tests.cpp
 )
 set(UniversalCan_TEST_HEADER
 )
@@ -18,6 +19,8 @@ target_link_libraries(
     TestUniversalCan PRIVATE
     gtest
     gtest_main
+    gmock
+    gmock_main
 )
 enable_testing()
 gtest_discover_tests(TestUniversalCan)
