@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.10)
 include(FetchContent)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -19,6 +19,8 @@ FUNCTION(PREPEND var )
    SET(${var} "${listVar}" PARENT_SCOPE)
 ENDFUNCTION(PREPEND)
 
+link_libraries(gcov)
+add_compile_options(--coverage -g -O0 -fprofile-arcs -ftest-coverage -Wno-unused-command-line-argument)
 # After a normal build, we can specify the location of various outputs of the
 # build. We put executables and static libraries outside the build directory in
 # bin/ and lib/, respectively.
@@ -47,6 +49,7 @@ add_subdirectory(tests)
 # as dependencies.
 add_executable(ProtocolMapper src/ProtocolMapper.cpp ${UniversalCan_SRC} ${UniversalCan_INC})
 
+target_compile_options(ProtocolMapper PUBLIC "--coverage" )
 # These variables slightly modify the install location to allow for version
 # specific installations.
 set(UniversalCan_INCLUDE_DEST "include/UniversalCan-${UniversalCan_VERSION}")

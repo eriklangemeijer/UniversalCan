@@ -17,8 +17,6 @@ CanMessage::CanMessage(std::vector<uint8_t> data,
     : data(data), msg_template(msg_template)
 
 {
-
-    message_str = std::string(data.begin(), data.end());
     if (msg_template != nullptr) {
         values = msg_template->parseData(data);
     }
@@ -26,8 +24,7 @@ CanMessage::CanMessage(std::vector<uint8_t> data,
 
 std::string CanMessage::to_string() {
     std::stringstream string_stream;
-    string_stream << "CAN_MESSAGE:\n";
-    string_stream << "MSG_STRING: " << message_str << std::endl;
+    string_stream << "CanMessage:\n";
 
     if (this->msg_template == nullptr) {
         string_stream << ("\tType:UNKNOWN\n");
@@ -57,7 +54,7 @@ std::string CanMessage::to_string() {
             } else if (data_type == "uint64") {
                 string_stream << (std::to_string(value.getValue<uint64_t>()) + "\n");
             } else {
-                string_stream << ("Unknown data type" + data_type + "\n");
+                string_stream << ("Unknown data type \"" + data_type + "\"\n");
             }
         }
     }
@@ -65,6 +62,5 @@ std::string CanMessage::to_string() {
 }
 
 void CanMessage::print() {
-    std::string const echo_str = this->to_string();
-    std::cout << echo_str;
+    std::cout << this->to_string();
 }
