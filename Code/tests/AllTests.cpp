@@ -115,9 +115,14 @@ TEST(CanMessage, StringPrintIntegers)
     const std::string string_rep_exp = "CanMessage:\n\tType:StringPrintTest\n\tValues:\n\t\tbyte:1\n\t\ttwobytes:257\n\t\tfourbytes:16843009\n\t\teightbytes:72340172838076673\n";
     std::string string_rep_act = response.to_string();
     GTEST_ASSERT_EQ(string_rep_act, string_rep_exp);
+    
+    testing::internal::CaptureStdout();
+    response.print();
+    std::string stdout_string = testing::internal::GetCapturedStdout();
+    GTEST_ASSERT_EQ(stdout_string, string_rep_exp);
 }
 
-TEST(CanMessage, StringPrintBoolUnknown)
+TEST(CanMessage, StringPrintBoolUnknownDt)
 {    
     std::string const string_print_template_str =
             "<Message Name=\"StringPrintTest\" Description=\"TestMessage for string printer\">\
@@ -143,6 +148,11 @@ TEST(CanMessage, StringPrintBoolUnknown)
     const std::string string_rep_exp = "CanMessage:\n\tType:StringPrintTest\n\tValues:\n\t\tbyteasbool:true\t\tbaddatatype:Unknown data type \"foo\"\n";
     std::string string_rep_act = response.to_string();
     GTEST_ASSERT_EQ(string_rep_act, string_rep_exp);
+
+    testing::internal::CaptureStdout();
+    response.print();
+    std::string stdout_string = testing::internal::GetCapturedStdout();
+    GTEST_ASSERT_EQ(stdout_string, string_rep_exp);
 }
 
 
@@ -152,6 +162,10 @@ TEST(CanMessage, StringPrintNULL)
     const std::string string_rep_exp = "CanMessage:\n\tType:UNKNOWN\n\tDATA: {0x01, 0x02, 0x03}\n";
     std::string string_rep_act = response.to_string();
     GTEST_ASSERT_EQ(string_rep_act, string_rep_exp);
+    testing::internal::CaptureStdout();
+    response.print();
+    std::string stdout_string = testing::internal::GetCapturedStdout();
+    GTEST_ASSERT_EQ(stdout_string, string_rep_exp);
 }
 
 /* This test shows how a message can be found using its filter function. 
