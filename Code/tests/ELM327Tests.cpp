@@ -1,45 +1,74 @@
-
 #include "ProtocolDefinitionParser.h"
 #include <Transcievers/ELM327.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <memory>
 #include <vector>
 
 class MockISerial : public ISerial {
-public:
+  public:
     MOCK_METHOD(bool, open, (const std::string &port), (override));
     MOCK_METHOD(void, close, (), (override));
     MOCK_METHOD(bool, write, (const std::vector<uint8_t> &data), (override));
     MOCK_METHOD(bool, writeString, (std::string data), (override));
     MOCK_METHOD(std::string, read, (), (override));
     MOCK_METHOD(void, registerCallback, (std::function<void(std::vector<uint8_t>)> callback), (override));
+
+    void DelegateToFake() {
+        ON_CALL(*this, registerCallback).WillByDefault([this](std::function<void(std::vector<uint8_t>)> callback) {
+            this->callbackPtr = callback;
+        });
+
+        ON_CALL(*this, writeString).WillByDefault([this](std::string data) {
+            this->callbackPtr({'>'});
+            return true;
+        });
+    }
+
+  private:
+    std::function<void(std::vector<uint8_t>)> callbackPtr;
 };
 
-TEST(ELM327, SetupCorrectAnswer)
-{
-    auto mock_serial = std::make_unique<MockISerial>();
+TEST(ELM327, SetupCorrectAnswer) {
+    auto mock_serial = std::make_unique<::testing::NiceMock<MockISerial>>();
 
-    EXPECT_CALL(*mock_serial, registerCallback(testing::_)).WillOnce(testing::Return());
-    // EXPECT_CALL(*mock_serial, close(testing::_));
-    EXPECT_CALL(*mock_serial, writeString("AT Z\r")).WillOnce(testing::Return(true));
-    EXPECT_CALL(*mock_serial, writeString("AT SP0\r")).WillOnce(testing::Return(true));
-    EXPECT_CALL(*mock_serial, writeString("01 00\r")).WillOnce(testing::Return(true));
+    mock_serial->DelegateToFake();
+
+    // Following expected calls have no action as they use the default defined in the DelegateToFake function
+    EXPECT_CALL(*mock_serial, registerCallback(testing::_));
+    EXPECT_CALL(*mock_serial, writeString("AT Z\r"));
+    EXPECT_CALL(*mock_serial, writeString("AT SP0\r"));
+    EXPECT_CALL(*mock_serial, writeString("01 00\r"));
+    
 
     ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../../ProtocolDefinitions/bmw_motorrad.xml");
 
     ELM327 elm327(std::move(mock_serial), std::make_unique<ProtocolDefinitionParser>(parser));
     elm327.start();
 }
-TEST(ELM327, ParsePIDString)
-{
+
+TEST(ELM327, SetupTimeOut) {
     auto mock_serial = std::make_unique<::testing::NiceMock<MockISerial>>();
-    ON_CALL(*mock_serial, writeString(::testing::_)).WillByDefault(::testing::Return(true));
+
+    mock_serial->DelegateToFake();
+
+    EXPECT_CALL(*mock_serial, writeString("AT Z\r")).WillOnce(::testing::Return(false));
+    EXPECT_CALL(*mock_serial, writeString("AT SP0\r")).WillOnce(::testing::Return(false));
+    EXPECT_CALL(*mock_serial, writeString("01 00\r")).WillOnce(::testing::Return(false));
+    
 
     ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../../ProtocolDefinitions/bmw_motorrad.xml");
 
     ELM327 elm327(std::move(mock_serial), std::make_unique<ProtocolDefinitionParser>(parser));
-    
+    elm327.start();
+}
+
+TEST(ELM327, ParsePIDString) {
+
+    auto mock_serial = std::make_unique<::testing::NiceMock<MockISerial>>();
+    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../../ProtocolDefinitions/bmw_motorrad.xml");
+    ELM327 elm327(std::move(mock_serial), std::make_unique<ProtocolDefinitionParser>(parser));
+
     std::string str = "41 00 FC 3E B0 11";
     std::vector<unsigned char> message(str.begin(), str.end());
     elm327.serialReceiveCallback(message);

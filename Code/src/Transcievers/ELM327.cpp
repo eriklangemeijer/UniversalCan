@@ -15,7 +15,7 @@
 
 #include <iostream>
 const uint16_t response_wait_sleep_time_ns = 10;
-const uint16_t response_wait_timeout_ms = 2000;
+const uint16_t response_wait_timeout_ms = 500;
 
 ELM327::ELM327(std::unique_ptr<ISerial> serial, std::unique_ptr<ProtocolDefinitionParser> protocol_parser)
     : serial(std::move(serial)), protocol_parser(std::move(protocol_parser)), running(false), ready(false) {
