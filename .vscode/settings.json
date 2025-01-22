@@ -84,7 +84,10 @@
         "set": "cpp",
         "unordered_set": "cpp",
         "fstream": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "regex": "cpp",
+        "codecvt": "cpp",
+        "csetjmp": "cpp"
     },
     "C_Cpp.default.compilerPath": "C:\\msys64\\ucrt64\\bin\\g++.exe",
     "editor.tokenColorCustomizations": {
@@ -112,5 +115,10 @@
     "gtest-adapter.debugConfig": [
         "(lldb) Launch(MacOS)"
     ],
-    "cmake.sourceDirectory": "C:/Users/erikl/Documents/code_projects/UniversalCan/Code"
+    "cmake.sourceDirectory": "C:/Users/erikl/Documents/code_projects/UniversalCan/Code",
+    "cmake.debugConfig": {
+        "args": [
+            "COM13"
+        ]
+    }
 }

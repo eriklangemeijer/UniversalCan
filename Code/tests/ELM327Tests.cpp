@@ -20,6 +20,12 @@ class MockISerial : public ISerial {
         });
 
         ON_CALL(*this, writeString).WillByDefault([this](std::string data) {
+            if(data == "AT Z\r") {
+                
+                std::string str = "ELM327 v1.0";
+                std::vector<unsigned char> message(str.begin(), str.end());
+                this->callbackPtr(message);
+            }
             this->callbackPtr({'>'});
             return true;
         });

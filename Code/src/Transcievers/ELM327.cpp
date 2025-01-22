@@ -104,12 +104,6 @@ bool ELM327::sendATMessage(std::string command, bool wait_for_response) {
     return true;
 }
 
-void ELM327::registerCallback(std::function<void(CanMessage &)> callback) {
-
-    this->callbackFunction = callback;
-    this->running = true;
-}
-
 bool ELM327::messageAvailable() {
     this->messageListLock.lock();
     bool const available = !this->messageList.empty();
