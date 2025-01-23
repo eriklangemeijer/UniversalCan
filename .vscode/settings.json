@@ -115,7 +115,7 @@
     "gtest-adapter.debugConfig": [
         "(lldb) Launch(MacOS)"
     ],
-    "cmake.sourceDirectory": "C:/Users/erikl/Documents/code_projects/UniversalCan/Code",
+    "cmake.sourceDirectory": "${workspaceFolder}/Code",
     "cmake.debugConfig": {
         "args": [
             "COM13"
