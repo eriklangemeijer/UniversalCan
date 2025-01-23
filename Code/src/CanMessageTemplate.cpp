@@ -21,10 +21,7 @@ CanMessageTemplate::CanMessageTemplate(pugi::xml_node &msg) {
 bool CanMessageTemplate::isMatch(std::vector<uint8_t> can_data) {
     try {
         std::vector<uint8_t> result = this->filter_function->call(can_data);
-        if (result.size() == 1) {
-            return (result[0] == 1);
-        }
-        return false;
+        return *((bool*)result.data());
     }
     catch (std::runtime_error &e) {
         return false;

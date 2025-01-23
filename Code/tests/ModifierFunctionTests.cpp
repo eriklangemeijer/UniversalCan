@@ -51,10 +51,35 @@ TEST(ModifierFunction, UnsupportedFunction) {
         } }, std::runtime_error);
 }
 
+TEST(ModifierFunctionConstant, HexConstantOneByte) {
+    const uint8_t test_value = 0xFA;
+    std::string const template_str =
+        "<CONSTANT value=\"0xFA\"/>";
+
+    std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
+    std::vector<uint8_t> ret_value = function->call({0});
+    uint8_t ret_int = *((uint8_t *)ret_value.data());
+    // GTEST_ASSERT_EQ(ret_value.size(), 1);
+    GTEST_ASSERT_EQ(ret_int, test_value);
+}
+
+TEST(ModifierFunctionConstant, HexConstantTwoBytes) {
+    const uint16_t test_value = 0xFABE;
+    std::string const template_str =
+        "<CONSTANT value=\"0xFABE\"/>";
+
+    std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
+    std::vector<uint8_t> ret_value = function->call({0});
+    // GTEST_ASSERT_EQ(ret_value.size(), 2);
+    uint16_t ret_int = *((uint16_t *)ret_value.data());
+    // GTEST_ASSERT_EQ(ret_value.size(), 1);
+    GTEST_ASSERT_EQ(ret_int, test_value);
+}
+
 /* Test to verify the BYTE_SELECT function using constant values.
     A single byte is selected.*/
 TEST(ModifierFunctionByteSelect, OneByteOk) {
-    const uint8_t test_value = 0xFA;
+    const uint8_t test_value = 0xCE;
     std::string const template_str =
         "<BYTE_SELECT>\
             <CONSTANT value=\"1\"/>\
@@ -92,7 +117,6 @@ TEST(ModifierFunctionByteSelect, MultiByteOk) {
         GTEST_ASSERT_EQ(ret_value[ii], test_value + ii);
     }
 }
-
 
 TEST(ModifierFunctionByteSelect, NoArgs) {
     std::string const template_str =
@@ -187,6 +211,7 @@ TEST(ModifierFunctionMultiply, InlineConstant) {
     uint32_t ret_int = *((uint32_t *)ret_value.data());
     GTEST_ASSERT_EQ(ret_int, test_value);
 }
+
 TEST(ModifierFunctionMultiply, TwoInlineConstant) {
     const uint32_t test_value = 9999 * 2222;
     std::string const template_str =
@@ -208,4 +233,21 @@ TEST(ModifierFunctionMultiply, TwoInlineConstantShortNotation) {
     std::vector<uint8_t> ret_value = function->call({0});
     uint32_t ret_int = *((uint32_t *)ret_value.data());
     GTEST_ASSERT_EQ(ret_int, test_value);
+}
+
+TEST(ModifierFunctionByteCompare, TwoByteHex) {
+    std::string const template_str =
+        "<INT_COMPARE arg2=\"0x0D41\">\
+            <BYTE_SELECT arg1=\"0\" arg2=\"2\"/>\
+        </INT_COMPARE>";
+
+    std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
+    std::vector<uint8_t> ret_value = function->call({0x41, 0x0D}); //data becomes flipped due to little endian OSes
+    bool ret_bool = *((bool *)ret_value.data());
+    GTEST_ASSERT_TRUE(ret_bool);
+
+    
+    ret_value = function->call({0x0D, 0x41});
+    ret_bool = *((bool *)ret_value.data());
+    GTEST_ASSERT_FALSE(ret_bool);
 }
