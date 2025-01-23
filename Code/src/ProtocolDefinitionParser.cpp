@@ -12,6 +12,10 @@
 #include <string>
 #include <vector>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 ProtocolDefinitionParser::ProtocolDefinitionParser(std::string filename) {
     pugi::xml_document doc;
     pugi::xml_parse_result const result = doc.load_file(filename.c_str());
