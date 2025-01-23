@@ -22,7 +22,6 @@ target_link_libraries(
     gmock
     gmock_main
 )
-enable_testing()
 gtest_discover_tests(TestUniversalCan)
 
 target_include_directories(TestUniversalCan PUBLIC

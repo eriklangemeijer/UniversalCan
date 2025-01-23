@@ -43,6 +43,7 @@ add_subdirectory(include)
 # stdout with:
 #   ctest -V
 
+enable_testing()
 add_subdirectory(tests)
 
 # Add the library UniversalCan as a target, with the contents of src/ and include/
