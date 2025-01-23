@@ -47,7 +47,7 @@ TEST(ELM327, SetupCorrectAnswer) {
     EXPECT_CALL(*mock_serial, writeString("01 00\r"));
     
 
-    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../../ProtocolDefinitions/bmw_motorrad.xml");
+    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../ProtocolDefinitions/bmw_motorrad.xml");
 
     ELM327 elm327(std::move(mock_serial), std::make_unique<ProtocolDefinitionParser>(parser));
     elm327.start();
@@ -63,7 +63,7 @@ TEST(ELM327, SetupTimeOut) {
     EXPECT_CALL(*mock_serial, writeString("01 00\r")).WillOnce(::testing::Return(false));
     
 
-    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../../ProtocolDefinitions/bmw_motorrad.xml");
+    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../ProtocolDefinitions/bmw_motorrad.xml");
 
     ELM327 elm327(std::move(mock_serial), std::make_unique<ProtocolDefinitionParser>(parser));
     elm327.start();
@@ -72,7 +72,7 @@ TEST(ELM327, SetupTimeOut) {
 TEST(ELM327, ParsePIDString) {
 
     auto mock_serial = std::make_unique<::testing::NiceMock<MockISerial>>();
-    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../../ProtocolDefinitions/bmw_motorrad.xml");
+    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../ProtocolDefinitions/bmw_motorrad.xml");
     ELM327 elm327(std::move(mock_serial), std::make_unique<ProtocolDefinitionParser>(parser));
 
     std::string str = "41 00 FC 3E B0 11";

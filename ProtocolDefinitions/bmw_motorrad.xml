@@ -1,7 +1,7 @@
 <ProtocolDefintion name="BMW Motorrad">
 
 <include path="./J1979.xml"/>
-<Message Name="M01VehicleSpeed" Description="Mode $01 response for VehicleSpeed">
+<Message Name="BMW01" Description="BMW message">
     <FILTER_FUNCTION name="filter" DataType="bool" Unit="flag">
         <INT_COMPARE>
             <BYTE_SELECT arg1="0" arg2="1"/>
@@ -22,15 +22,9 @@
         <Value name="EngineRPM" DataType="uint8" Unit="rpm">
             <DIVIDE arg2="4">
                 <ADD>
-                    <BYTE_SELECT>
-                        <CONSTANT value="2"/>
-                        <CONSTANT value="3"/>
-                    </BYTE_SELECT>
+                    <BYTE_SELECT arg1="2" arg2="3"/>
                     <MULTIPLY arg2="256">
-                        <BYTE_SELECT>
-                            <CONSTANT value="3"/>
-                            <CONSTANT value="4"/>
-                        </BYTE_SELECT>
+                        <BYTE_SELECT arg1="3" arg2="4"/>
                     </MULTIPLY>
                 </ADD>
             </DIVIDE>

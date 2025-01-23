@@ -12,13 +12,12 @@
 const uint8_t mode1_veh_spd_id = 0x0D;
 const uint8_t mode1_response_id = 0x41;
 
-/* Mode 1 messages can be used to request live data. 
+/* Mode 1 messages can be used to request live data.
    This test verifies how responses to these messages are parsed by the template
    In this test vehicle speed response is checked which is stored directly in the message in kph */
-TEST(MessageParsing, M01EngSpdResponse)
-{
+TEST(MessageParsing, M01EngSpdResponse) {
     std::string const mode1_veh_spd_template_str =
-            "<Message Name=\"M01VehicleSpeed\" Description=\"Mode $01 response for VehicleSpeed\">\
+        "<Message Name=\"M01VehicleSpeed\" Description=\"Mode $01 response for VehicleSpeed\">\
                     <FILTER_FUNCTION name=\"filter\" DataType=\"bool\" Unit=\"flag\">\
                         <LOGICAL_AND>\
                             <INT_COMPARE>\
@@ -57,36 +56,31 @@ TEST(MessageParsing, M01EngSpdResponse)
     GTEST_ASSERT_EQ(response_60kph.values[0].getValue<uint8_t>(), 60);
     CanMessage response_120kph = CanMessage({mode1_response_id, mode1_veh_spd_id, 120}, mode1_veh_spd_template);
     GTEST_ASSERT_EQ(response_120kph.values[0].getValue<uint8_t>(), 120);
-
-    
 }
 
-/*In this test PID Support response is checked which stores a bitmap with supported PID's. 
+/*In this test PID Support response is checked which stores a bitmap with supported PID's.
   Reference values come from wikipedia article */
-TEST(MessageParsing, M01PIDSupportResponse)
-{
+TEST(MessageParsing, M01PIDSupportResponse) {
     const uint8_t mode1_supp_pid = 0x00;
-    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../../ProtocolDefinitions/J1979.xml");
+    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../ProtocolDefinitions/J1979.xml");
     std::shared_ptr<CanMessageTemplate> const template_ptr =
-      std::make_shared<CanMessageTemplate>(*parser.getMessageList().begin());
+        std::make_shared<CanMessageTemplate>(*parser.getMessageList().begin());
     CanMessage response_supp_pid = CanMessage({mode1_response_id, mode1_supp_pid, 0xBE, 0x1F, 0xA8, 0x13}, template_ptr);
     // From wikipedia table: https://en.wikipedia.org/wiki/OBD-II_PIDs#Service_01_PID_00
     const std::vector<bool> expected_response = {true, false, true, true, true, true, true, false,
-                                           false, false, false, true, true, true, true, true,
-                                           true, false, true, false, true, false, false, false,
-                                           false, false, false, true, false, false, true, true};
+                                                 false, false, false, true, true, true, true, true,
+                                                 true, false, true, false, true, false, false, false,
+                                                 false, false, false, true, false, false, true, true};
 
-    for(uint8_t ii = 0; ii < expected_response.size(); ii++) {
-        
+    for (uint8_t ii = 0; ii < expected_response.size(); ii++) {
+
         GTEST_ASSERT_EQ(response_supp_pid.values[ii].getBoolValue(), expected_response[ii]);
     }
-    
 }
 
-TEST(CanMessage, StringPrintIntegers)
-{    
+TEST(CanMessage, StringPrintIntegers) {
     std::string const string_print_template_str =
-            "<Message Name=\"StringPrintTest\" Description=\"TestMessage for string printer\">\
+        "<Message Name=\"StringPrintTest\" Description=\"TestMessage for string printer\">\
                     <FILTER_FUNCTION name=\"filter\" DataType=\"bool\" Unit=\"flag\">\
                         <INT_COMPARE arg1=\"1\" arg2=\"2\"/>\
                     </FILTER_FUNCTION>\
@@ -110,22 +104,21 @@ TEST(CanMessage, StringPrintIntegers)
     doc.load_string(string_print_template_str.c_str());
     pugi::xml_node msg = doc.child("Message");
     std::shared_ptr<CanMessageTemplate> const string_print_template = std::make_shared<CanMessageTemplate>(msg);
-    CanMessage response = CanMessage({1,1,1,1,1,1,1,1}, string_print_template);
-    //Values can be calculated as ((1<<8) + 1) for each byte increment. Only 1,2,4,8 bytes are used in this test
+    CanMessage response = CanMessage({1, 1, 1, 1, 1, 1, 1, 1}, string_print_template);
+    // Values can be calculated as ((1<<8) + 1) for each byte increment. Only 1,2,4,8 bytes are used in this test
     const std::string string_rep_exp = "CanMessage:\n\tType:StringPrintTest\n\tValues:\n\t\tbyte:1\n\t\ttwobytes:257\n\t\tfourbytes:16843009\n\t\teightbytes:72340172838076673\n";
     std::string string_rep_act = response.to_string();
     GTEST_ASSERT_EQ(string_rep_act, string_rep_exp);
-    
+
     testing::internal::CaptureStdout();
     response.print();
     std::string stdout_string = testing::internal::GetCapturedStdout();
     GTEST_ASSERT_EQ(stdout_string, string_rep_exp);
 }
 
-TEST(CanMessage, StringPrintBoolUnknownDt)
-{    
+TEST(CanMessage, StringPrintBoolUnknownDt) {
     std::string const string_print_template_str =
-            "<Message Name=\"StringPrintTest\" Description=\"TestMessage for string printer\">\
+        "<Message Name=\"StringPrintTest\" Description=\"TestMessage for string printer\">\
                     <FILTER_FUNCTION name=\"filter\" DataType=\"bool\" Unit=\"flag\">\
                         <INT_COMPARE arg1=\"1\" arg2=\"2\"/>\
                     </FILTER_FUNCTION>\
@@ -143,8 +136,8 @@ TEST(CanMessage, StringPrintBoolUnknownDt)
     doc.load_string(string_print_template_str.c_str());
     pugi::xml_node msg = doc.child("Message");
     std::shared_ptr<CanMessageTemplate> const string_print_template = std::make_shared<CanMessageTemplate>(msg);
-    CanMessage response = CanMessage({1,1}, string_print_template);
-    //Values can be calculated as ((1<<8) + 1) for each byte increment. Only 1,2,4,8 bytes are used in this test
+    CanMessage response = CanMessage({1, 1}, string_print_template);
+    // Values can be calculated as ((1<<8) + 1) for each byte increment. Only 1,2,4,8 bytes are used in this test
     const std::string string_rep_exp = "CanMessage:\n\tType:StringPrintTest\n\tValues:\n\t\tbyteasbool:true\t\tbaddatatype:Unknown data type \"foo\"\n";
     std::string string_rep_act = response.to_string();
     GTEST_ASSERT_EQ(string_rep_act, string_rep_exp);
@@ -155,10 +148,8 @@ TEST(CanMessage, StringPrintBoolUnknownDt)
     GTEST_ASSERT_EQ(stdout_string, string_rep_exp);
 }
 
-
-TEST(CanMessage, StringPrintNULL)
-{       
-    CanMessage response = CanMessage({1,2,3}, nullptr);
+TEST(CanMessage, StringPrintNULL) {
+    CanMessage response = CanMessage({1, 2, 3}, nullptr);
     const std::string string_rep_exp = "CanMessage:\n\tType:UNKNOWN\n\tDATA: {0x01, 0x02, 0x03}\n";
     std::string string_rep_act = response.to_string();
     GTEST_ASSERT_EQ(string_rep_act, string_rep_exp);
@@ -168,32 +159,54 @@ TEST(CanMessage, StringPrintNULL)
     GTEST_ASSERT_EQ(stdout_string, string_rep_exp);
 }
 
-/* This test shows how a message can be found using its filter function. 
+/* This test shows how a message can be found using its filter function.
    This is neccessary to identify the template matching a message.*/
-TEST(ProtocolDefinitionParser, findTemplate)
-{
-    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../../ProtocolDefinitions/J1979.xml");
-    std::vector<uint8_t> const msg_data = { mode1_response_id,
-                                            mode1_veh_spd_id,
-                                            0 };
+TEST(ProtocolDefinitionParser, findTemplate) {
+    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../ProtocolDefinitions/J1979.xml");
+    std::vector<uint8_t> const msg_data = {mode1_response_id,
+                                           mode1_veh_spd_id,
+                                           0};
     auto msg_template = parser.findMatch(msg_data);
     GTEST_ASSERT_TRUE(strcmp(msg_template->getName().c_str(), "M01VehicleSpeed") == 0);
 }
 
+/* This test shows how an exception is thrown if the file cannot be found.*/
+TEST(ProtocolDefinitionParser, CannotFindProtocolFile) {
+    const std::string expected_error_string = "Cannot open protocol file";
+    EXPECT_THROW({
+        try
+        {
+            ProtocolDefinitionParser parser = ProtocolDefinitionParser("foobar");
+        }
+        catch( const std::runtime_error& e )
+        {
+            EXPECT_STREQ(expected_error_string.c_str(), e.what() );
+            throw;
+        } }, std::runtime_error);
+}
+
+/* This test shows how a message with an unknown template results in a nullptr for the template.*/
+TEST(ProtocolDefinitionParser, NotFindTemplate) {
+    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../ProtocolDefinitions/J1979.xml");
+    std::vector<uint8_t> const msg_data = {0,
+                                           0,
+                                           0};
+    auto msg_template = parser.findMatch(msg_data);
+    GTEST_ASSERT_EQ(msg_template, nullptr);
+}
+
 /* This test shows how messages can defined in subfiles. This way protocols can include messages from other protocols.*/
-TEST(ProtocolDefinitionParser, IncludeRelativeFile)
-{
-    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../../ProtocolDefinitions/bmw_motorrad.xml");
-    std::vector<uint8_t> const msg_data = { mode1_response_id,
-                                            mode1_veh_spd_id,
-                                            0 };
+TEST(ProtocolDefinitionParser, IncludeRelativeFile) {
+    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../ProtocolDefinitions/bmw_motorrad.xml");
+    std::vector<uint8_t> const msg_data = {mode1_response_id,
+                                           mode1_veh_spd_id,
+                                           0};
     // Message is only defined in J1979.xml which is included by filename in bmw_motorrad.xml
     auto msg_template = parser.findMatch(msg_data);
     GTEST_ASSERT_TRUE(strcmp(msg_template->getName().c_str(), "M01VehicleSpeed") == 0);
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
