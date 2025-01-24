@@ -19,7 +19,7 @@ class ModifierFunction {
                                         T argument1,
                                         Op operation);
     template <typename T>
-    void copyTypeToData(T value, std::vector<uint8_t> &data);
+    std::vector<uint8_t> copyTypeToData(T value) ;
     template <typename T>
     T convertDataToType(const std::vector<uint8_t> &data);
 

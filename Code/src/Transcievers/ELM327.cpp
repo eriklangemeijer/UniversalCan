@@ -2,6 +2,7 @@
 #include <Transcievers/ELM327.h>
 #include <Transcievers/ISerial.h>
 #include <algorithm>
+#include <sstream>
 #include <cctype>
 #include <chrono>
 #include <cstddef>
@@ -12,13 +13,14 @@
 #include <thread>
 #include <utility>
 #include <vector>
-
+#include <string>
 #include <iostream>
+#include <iomanip>
 const uint16_t response_wait_sleep_time_ns = 10;
 const uint16_t response_wait_timeout_ms = 500;
 
-ELM327::ELM327(std::unique_ptr<ISerial> serial, std::unique_ptr<ProtocolDefinitionParser> protocol_parser)
-    : serial(std::move(serial)), protocol_parser(std::move(protocol_parser)), running(false), ready(false) {
+ELM327::ELM327(std::unique_ptr<ISerial> serial, std::unique_ptr<ProtocolDefinitionParser> protocol_definition)
+    : serial(std::move(serial)), protocol_definition(std::move(protocol_definition)), running(false), ready(false) {
 
 }
 
@@ -63,7 +65,7 @@ void ELM327::serialReceiveCallback(std::vector<uint8_t> message) {
         this->ready = true;
     }
 
-    auto msg_template = this->protocol_parser->findMatch(message);
+    auto msg_template = this->protocol_definition->findMatch(message);
     bool const is_hex = std::all_of(message.begin(), message.end(), [](char character) {
         return std::isxdigit(static_cast<unsigned char>(character)) || character == ' ';
     });
@@ -77,7 +79,7 @@ void ELM327::serialReceiveCallback(std::vector<uint8_t> message) {
     }
 }
 
-bool ELM327::sendMessage(std::vector<CanMessage> messages) {
+bool ELM327::sendMessages(std::vector<CanMessage> messages) {
     for (const auto &msg : messages) {
         if (!serial->write(msg.data)) {
             return false;
@@ -104,26 +106,48 @@ bool ELM327::sendATMessage(std::string command, bool wait_for_response) {
     return true;
 }
 
+bool ELM327::requestMessage(std::string msg_name) {
+    auto msg_template = this->protocol_definition->findMessageByName(msg_name);
+    if (!msg_template) {
+        std::cerr << "Message not found: " << msg_name << std::endl;
+        return false;
+    }
+    std::vector<uint8_t> request_data = msg_template->getRequestMessage();
+    std::stringstream msg_stream;
+    msg_stream << std::hex << std::uppercase << std::setfill('0');
+    for (size_t ii = 0; ii < request_data.size(); ii++) {
+        msg_stream << std::setw(2) << static_cast<unsigned>(request_data[ii]);
+        if (ii == request_data.size()-1) {
+            msg_stream << "\r";
+        } else {
+            msg_stream << " ";
+        }
+    }
+    std::string msg_string = msg_stream.str();
+    this->serial->writeString(msg_string);
+    return true;
+}
+
 bool ELM327::messageAvailable() {
-    this->messageListLock.lock();
-    bool const available = !this->messageList.empty();
-    this->messageListLock.unlock();
+    this->message_list_lock.lock();
+    bool const available = !this->message_list.empty();
+    this->message_list_lock.unlock();
     return available;
 }
 
 void ELM327::storeMessage(CanMessage &message) {
-    this->messageListLock.lock();
-    this->messageList.push_back(message);
-    this->messageListLock.unlock();
+    this->message_list_lock.lock();
+    this->message_list.push_back(message);
+    this->message_list_lock.unlock();
 }
 
 std::shared_ptr<CanMessage> ELM327::readMessage() {
     std::shared_ptr<CanMessage> message = nullptr;
-    this->messageListLock.lock();
-    if (!this->messageList.empty()) {
-        message = std::make_unique<CanMessage>(this->messageList.front());
-        this->messageList.pop_front();
+    this->message_list_lock.lock();
+    if (!this->message_list.empty()) {
+        message = std::make_unique<CanMessage>(this->message_list.front());
+        this->message_list.pop_front();
     }
-    this->messageListLock.unlock();
+    this->message_list_lock.unlock();
     return message;
 }

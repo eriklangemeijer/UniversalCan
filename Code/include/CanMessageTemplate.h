@@ -17,10 +17,12 @@ class CanMessageTemplate {
     std::string description;
     std::list<CanValueTemplate> value_list;
     std::shared_ptr<ModifierFunction> filter_function;
+    std::shared_ptr<ModifierFunction> req_msg_function;
 
   public:
     CanMessageTemplate(pugi::xml_node &msg);
     std::vector<CanValue> parseData(std::vector<uint8_t> can_data);
     bool isMatch(std::vector<uint8_t> can_data);
     std::string getName();
+    std::vector<uint8_t> getRequestMessage();
 };

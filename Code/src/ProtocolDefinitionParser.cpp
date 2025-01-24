@@ -101,3 +101,13 @@ std::shared_ptr<CanMessageTemplate> ProtocolDefinitionParser::findMatch(std::vec
     }
     return nullptr;
 }
+
+
+std::shared_ptr<CanMessageTemplate> ProtocolDefinitionParser::findMessageByName(std::string msg_name) {
+    for (auto message : this->message_list) {
+        if (message.getName() == msg_name) {
+            return std::make_shared<CanMessageTemplate>(message); // Return a reference to the matching message
+        }
+    }
+    return nullptr;
+}

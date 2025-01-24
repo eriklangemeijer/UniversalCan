@@ -12,8 +12,8 @@ const uint8_t max_value_size = 8;
 ModifierFunction::ModifierFunction(pugi::xml_attribute attribute) {
     int const const_value = attribute.as_int();
     function = ([this, const_value](std::vector<uint8_t>, std::vector<ModifierFunction>) {    
-        std::vector<uint8_t> value = std::vector<uint8_t>(sizeof(const_value));
-        copyTypeToData(const_value, value);
+        
+        auto value = copyTypeToData(const_value);
         return value;
     });
 }
@@ -98,8 +98,7 @@ ModifierFunction::ModifierFunction(pugi::xml_node operation)
         int const const_value = operation.attribute("value").as_int();
         function = ([this, const_value](std::vector<uint8_t>,
                                         std::vector<ModifierFunction>) {
-            std::vector<uint8_t> value = std::vector<uint8_t>(sizeof(const_value));
-            copyTypeToData(const_value, value);
+            auto value = copyTypeToData(const_value);
             return value;
         });
 
@@ -112,8 +111,8 @@ std::vector<uint8_t> ModifierFunction::modifierSelectByte(std::vector<uint8_t> d
     if (args.size() != 2) {
         throw std::runtime_error("Incorrect number of arguments provided");
     }
-    auto const byte_start = convertDataToType<uint16_t>(args[0].call(data));
-    auto const byte_end = convertDataToType<uint16_t>(args[1].call(data));
+    auto  byte_start = convertDataToType<uint16_t>(args[0].call(data));
+    auto  byte_end = convertDataToType<uint16_t>(args[1].call(data));
     if (byte_start >= byte_end) {
         throw std::runtime_error("byte_start must be smaller than byte_end");
     }
@@ -129,10 +128,11 @@ std::vector<uint8_t> ModifierFunction::modifierSelectByte(std::vector<uint8_t> d
 
 template <typename T, typename Op>
 std::vector<uint8_t> ModifierFunction::applyOperation(std::vector<uint8_t> data, T argument1, Op operation) {
-    T value = convertDataToType<T>(data);
+    //Converting lhs value to largest integer to prevent overflow
+    uint64_t value = convertDataToType<uint64_t>(data);
     value = operation(value, argument1);
-    copyTypeToData(value, data);
-    return data;
+    //Converting back to minimal integer size to reduce padding
+    return copyTypeToData(value);
 }
 
 template <typename Op>
@@ -165,8 +165,7 @@ std::vector<uint8_t> ModifierFunction::applyBitShift(std::vector<uint8_t> data, 
     } else {
         value >>= nr_bits;
     }
-    copyTypeToData(value, data);
-    return data;
+    return copyTypeToData(value);
 }
 
 std::vector<uint8_t> ModifierFunction::modifierBitShift(std::vector<uint8_t> data, std::vector<ModifierFunction> args, bool is_left_shift) {
@@ -209,9 +208,20 @@ T ModifierFunction::convertDataToType(const std::vector<uint8_t> &data) {
 }
 
 template <typename T>
-void ModifierFunction::copyTypeToData(T value, std::vector<uint8_t> &data) {
-    T temp_value = value;
-    std::memcpy(data.data(), &temp_value, sizeof(T));
+std::vector<uint8_t> ModifierFunction::copyTypeToData(T value) {
+    uint8_t value_size = sizeof(value);
+    if(value <= 0xFF) {
+        value_size = sizeof(uint8_t);
+    } else if(value <= 0xFFFF) {
+        value_size = sizeof(uint16_t);
+    } else if(value <= 0xFFFFFFFF) {
+        value_size = sizeof(uint32_t);
+    } else {
+        value_size = sizeof(uint64_t);
+    }
+    std::vector<uint8_t> data = std::vector<uint8_t>(value_size);
+    std::memcpy(data.data(), &value, data.size());
+    return data;
 }
 
 std::vector<uint8_t> ModifierFunction::call(std::vector<uint8_t> can_data) {

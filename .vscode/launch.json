@@ -51,7 +51,7 @@
             "preLaunchTask": "CMake: build",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build/tests/bin/",
+            "cwd": "${workspaceFolder}/build/tests",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

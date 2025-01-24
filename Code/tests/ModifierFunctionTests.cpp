@@ -245,7 +245,6 @@ TEST(ModifierFunctionByteCompare, TwoByteHex) {
     std::vector<uint8_t> ret_value = function->call({0x41, 0x0D}); //data becomes flipped due to little endian OSes
     bool ret_bool = *((bool *)ret_value.data());
     GTEST_ASSERT_TRUE(ret_bool);
-
     
     ret_value = function->call({0x0D, 0x41});
     ret_bool = *((bool *)ret_value.data());

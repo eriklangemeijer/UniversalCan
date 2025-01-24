@@ -8,7 +8,6 @@
 #include <mutex>
 #include <stdexcept>
 #include <string>
-#include <sys/_types/_ssize_t.h>
 #include <sys/fcntl.h>
 #include <termios.h>
 #include <thread>

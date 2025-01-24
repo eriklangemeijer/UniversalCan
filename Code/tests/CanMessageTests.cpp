@@ -157,3 +157,25 @@ TEST(CanMessage, StringPrintNULL) {
     GTEST_ASSERT_EQ(stdout_string, string_rep_exp);
 }
 
+TEST(CanMessage, TemplateRequestMessage) {
+    std::string const string_print_template_str ="<Message Name=\"ReqMsgTest\" Description=\"TestMessage\">\
+                <REQUEST_MSG>\
+                    <CONSTANT value=\"0x0001\"/>\
+                </REQUEST_MSG>\
+                <FILTER_FUNCTION name=\"filter\" DataType=\"bool\" Unit=\"flag\">\
+                    <INT_COMPARE arg1=\"1\" arg2=\"2\"/>\
+                </FILTER_FUNCTION>\
+                <Values>\
+                </Values>\
+        </Message>";
+
+    pugi::xml_document doc;
+    doc.load_string(string_print_template_str.c_str());
+    pugi::xml_node msg = doc.child("Message");
+    std::shared_ptr<CanMessageTemplate> const string_print_template = std::make_shared<CanMessageTemplate>(msg);
+    std::vector<uint8_t> req_msg = string_print_template->getRequestMessage();
+    //Note value is switched due to little endian
+    GTEST_ASSERT_EQ(req_msg[0], 0x01);
+    GTEST_ASSERT_EQ(req_msg[1], 0x00);
+
+}

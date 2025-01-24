@@ -1,5 +1,8 @@
 <ProtocolDefintion name="SAE_J1979">
     <Message Name="M01PIDSUPPORT" Description="Mode $01 response for supported PID's">
+        <REQUEST_MSG>
+            <CONSTANT value="0x0001"/>
+        </REQUEST_MSG>
         <FILTER_FUNCTION name="filter" DataType="bool" Unit="flag">
             <INT_COMPARE>
                 <BYTE_SELECT arg1="0" arg2="2"/>
@@ -290,6 +293,9 @@
         </Values>
     </Message>
     <Message Name="M01VehicleSpeed" Description="Mode $01 response for VehicleSpeed">
+        <REQUEST_MSG>
+            <CONSTANT value="0x0D01"/>
+        </REQUEST_MSG>
         <FILTER_FUNCTION name="filter" DataType="bool" Unit="flag">
             <INT_COMPARE arg2="0x0D41">
                 <BYTE_SELECT arg1="0" arg2="2"/>

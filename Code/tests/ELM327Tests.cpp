@@ -82,3 +82,25 @@ TEST(ELM327, ParsePIDString) {
     auto parsed_message = elm327.readMessage();
     ASSERT_THAT(parsed_message->data, ::testing::ElementsAre(0x41, 0x00, 0xFC, 0x3E, 0xB0, 0x11));
 }
+
+TEST(ELM327, RequestMessage) {
+    auto mock_serial = std::make_unique<::testing::NiceMock<MockISerial>>();
+
+    mock_serial->DelegateToFake();
+
+    // Following expected calls have no action as they use the default defined in the DelegateToFake function
+    EXPECT_CALL(*mock_serial, registerCallback(testing::_));
+    EXPECT_CALL(*mock_serial, writeString("AT Z\r"));
+    EXPECT_CALL(*mock_serial, writeString("AT SP0\r"));
+    EXPECT_CALL(*mock_serial, writeString("01 00\r"));
+    EXPECT_CALL(*mock_serial, writeString("01 0D\r"));
+    
+
+    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../ProtocolDefinitions/bmw_motorrad.xml");
+
+    ELM327 elm327(std::move(mock_serial), std::make_unique<ProtocolDefinitionParser>(parser));
+    elm327.start();
+    elm327.requestMessage("M01VehicleSpeed");
+
+
+}
