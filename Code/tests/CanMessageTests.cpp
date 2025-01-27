@@ -2,13 +2,13 @@
 #include <CanMessage.h>
 #include <CanMessageTemplate.h>
 #include <ProtocolDefinitionParser.h>
+#include <TestConstants.h>
 #include <cstdint>
 #include <cstring>
 #include <gtest/gtest.h>
 #include <memory>
 #include <string>
 #include <vector>
-#include <TestConstants.h>
 
 /* Mode 1 messages can be used to request live data.
    This test verifies how responses to these messages are parsed by the template
@@ -76,6 +76,7 @@ TEST(CanMessage, M01PIDSupportResponse) {
     }
 }
 
+/*In this test the string printer is tested for integer values. */
 TEST(CanMessage, StringPrintIntegers) {
     std::string const string_print_template_str =
         "<Message Name=\"StringPrintTest\" Description=\"TestMessage for string printer\">\
@@ -114,6 +115,7 @@ TEST(CanMessage, StringPrintIntegers) {
     GTEST_ASSERT_EQ(stdout_string, string_rep_exp);
 }
 
+/*In this test the string printer is tested for boolean or unknwon datatypes. */
 TEST(CanMessage, StringPrintBoolUnknownDt) {
     std::string const string_print_template_str =
         "<Message Name=\"StringPrintTest\" Description=\"TestMessage for string printer\">\
@@ -146,6 +148,7 @@ TEST(CanMessage, StringPrintBoolUnknownDt) {
     GTEST_ASSERT_EQ(stdout_string, string_rep_exp);
 }
 
+/*In this test the string printer is tested when no template can be found. This is useful when trying to identify unknown messages.*/
 TEST(CanMessage, StringPrintNULL) {
     CanMessage response = CanMessage({1, 2, 3}, nullptr);
     const std::string string_rep_exp = "CanMessage:\n\tType:UNKNOWN\n\tDATA: {0x01, 0x02, 0x03}\n";
@@ -158,7 +161,7 @@ TEST(CanMessage, StringPrintNULL) {
 }
 
 TEST(CanMessage, TemplateRequestMessage) {
-    std::string const string_print_template_str ="<Message Name=\"ReqMsgTest\" Description=\"TestMessage\">\
+    std::string const string_print_template_str = "<Message Name=\"ReqMsgTest\" Description=\"TestMessage\">\
                 <REQUEST_MSG>\
                     <CONSTANT value=\"0x0001\"/>\
                 </REQUEST_MSG>\
@@ -174,8 +177,7 @@ TEST(CanMessage, TemplateRequestMessage) {
     pugi::xml_node msg = doc.child("Message");
     std::shared_ptr<CanMessageTemplate> const string_print_template = std::make_shared<CanMessageTemplate>(msg);
     std::vector<uint8_t> req_msg = string_print_template->getRequestMessage();
-    //Note value is switched due to little endian
+    // Note value is switched due to little endian
     GTEST_ASSERT_EQ(req_msg[0], 0x01);
     GTEST_ASSERT_EQ(req_msg[1], 0x00);
-
 }
