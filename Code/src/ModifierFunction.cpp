@@ -7,8 +7,9 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <limits>
 const uint8_t max_value_size = 8;
-
+const uint8_t nr_of_arguments = 2;
 ModifierFunction::ModifierFunction(pugi::xml_attribute attribute) {
     int const const_value = attribute.as_int();
     function = ([this, const_value](std::vector<uint8_t>, std::vector<ModifierFunction>) {    
@@ -31,10 +32,10 @@ ModifierFunction::ModifierFunction(pugi::xml_node operation)
         std::string const attr_name = attr.name();
         if (std::regex_match(attr_name, match, pattern)) {
             int const index = std::stoi(match[1].str());
-            if (index >= 1) {
+            if (index >= 1 && index <= nr_of_arguments) {
                 arguments.insert(arguments.begin() + index - 1, attr);
             } else {
-                std::cout << "Invalid argument number " << index << std::endl;
+                throw std::runtime_error("Invalid argument number " + std::to_string(index));
             }
         }
     }
@@ -108,7 +109,7 @@ ModifierFunction::ModifierFunction(pugi::xml_node operation)
 }
 
 std::vector<uint8_t> ModifierFunction::modifierSelectByte(std::vector<uint8_t> data, std::vector<ModifierFunction> args) {
-    if (args.size() != 2) {
+    if (args.size() != nr_of_arguments) {
         throw std::runtime_error("Incorrect number of arguments provided");
     }
     auto  byte_start = convertDataToType<uint16_t>(args[0].call(data));
@@ -210,11 +211,11 @@ T ModifierFunction::convertDataToType(const std::vector<uint8_t> &data) {
 template <typename T>
 std::vector<uint8_t> ModifierFunction::copyTypeToData(T value) {
     uint8_t value_size = sizeof(value);
-    if(value <= 0xFF) {
+    if(value <= std::numeric_limits<uint8_t>::max()) {
         value_size = sizeof(uint8_t);
-    } else if(value <= 0xFFFF) {
+    } else if(value <= std::numeric_limits<uint16_t>::max()) {
         value_size = sizeof(uint16_t);
-    } else if(value <= 0xFFFFFFFF) {
+    } else if(value <= std::numeric_limits<uint32_t>::max()) {
         value_size = sizeof(uint32_t);
     } else {
         value_size = sizeof(uint64_t);

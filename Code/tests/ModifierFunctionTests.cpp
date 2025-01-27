@@ -183,6 +183,52 @@ TEST(ModifierFunctionMultiply, TwoLargeConstants) {
     GTEST_ASSERT_EQ(ret_int, test_value);
 }
 
+TEST(ModifierFunctionMultiply, CombinedArgumentsShortLong) {
+    const uint8_t test_value = 6;
+    std::string const template_str =
+        "<MULTIPLY arg1=\"3\">\
+            <BYTE_SELECT>\
+                <CONSTANT value=\"1\"/>\
+                <CONSTANT value=\"2\"/>\
+            </BYTE_SELECT>\
+        </MULTIPLY>";
+
+    std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
+}
+
+TEST(ModifierFunctionMultiply, CombinedArgumentsLongShort) {
+    const uint8_t test_value = 6;
+    std::string const template_str =
+        "<MULTIPLY arg2=\"3\">\
+            <BYTE_SELECT>\
+                <CONSTANT value=\"1\"/>\
+                <CONSTANT value=\"2\"/>\
+            </BYTE_SELECT>\
+        </MULTIPLY>";
+
+    std::shared_ptr<ModifierFunction> function = InitModifierFunction(template_str);
+}
+TEST(ModifierFunctionMultiply, CombinedArgumentsOutOfRange) {
+    const uint8_t test_value = 6;
+    std::string const template_str =
+        "<MULTIPLY arg10=\"3\">\
+            <BYTE_SELECT>\
+                <CONSTANT value=\"1\"/>\
+                <CONSTANT value=\"2\"/>\
+            </BYTE_SELECT>\
+        </MULTIPLY>";
+
+    EXPECT_THROW({
+        try
+        {
+            auto function = InitModifierFunction(template_str);
+        }
+        catch( const std::runtime_error& e )
+        {
+            EXPECT_STREQ("Invalid argument number 10", e.what() );
+            throw;
+        } }, std::runtime_error);
+}
 TEST(ModifierFunctionMultiply, OneConstantOneByteSelect) {
     const uint8_t test_value = 6;
     std::string const template_str =
