@@ -24,6 +24,16 @@ UniversalCan separates message definitions from communication software, enabling
 
 This approach fosters collaboration and reduces duplication of effort.
 
+## How To Use
 
-## Previous work
-# [OBDGeek](https://sourceforge.net/projects/obdgeek/)
+The CMake project provides two targets the UniversalCan library and the ProtocolMapper exectuble. In addition there is a TestUniversalCan executable providing unit tests.
+
+### UniversalCan library
+The library once built can be used to integrate UniversalCan functionality into other programs. 
+This can be used to build a GUI or automate diagnostic tools without thinking about the details of communication with a vehicle.
+The library is defined in [UniversalCanLib.cpp](Code\src\UniversalCanLib.cpp).
+
+
+### ProtocolMapper
+The protocolmapper executable is a commandline providing some features on the command line. For now this is mainly a demo of the communication with the vehicle.
+The ProtocolMapper is defined in [ProtocolMapper.cpp](Code\src\ProtocolMapper.cpp)
