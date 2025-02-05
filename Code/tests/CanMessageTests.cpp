@@ -105,7 +105,14 @@ TEST(CanMessage, StringPrintIntegers) {
     std::shared_ptr<CanMessageTemplate> const string_print_template = std::make_shared<CanMessageTemplate>(msg);
     CanMessage response = CanMessage({1, 1, 1, 1, 1, 1, 1, 1}, string_print_template);
     // Values can be calculated as ((1<<8) + 1) for each byte increment. Only 1,2,4,8 bytes are used in this test
-    const std::string string_rep_exp = "CanMessage:\n\tType:StringPrintTest\n\tValues:\n\t\tbyte:1\n\t\ttwobytes:257\n\t\tfourbytes:16843009\n\t\teightbytes:72340172838076673\n";
+    const std::string string_rep_exp = "<CanMessage Type=\"StringPrintTest\"/>\n\
+\t<Values>\n\
+\t\t<Value name=\"byte\" datatype=\"uint8\" value=\"1\"/>\n\
+\t\t<Value name=\"twobytes\" datatype=\"uint16\" value=\"257\"/>\n\
+\t\t<Value name=\"fourbytes\" datatype=\"uint32\" value=\"16843009\"/>\n\
+\t\t<Value name=\"eightbytes\" datatype=\"uint64\" value=\"72340172838076673\"/>\n\
+\t</Values>\n\
+</CanMessage>\n";
     std::string string_rep_act = response.to_string();
     GTEST_ASSERT_EQ(string_rep_act, string_rep_exp);
 
@@ -138,7 +145,13 @@ TEST(CanMessage, StringPrintBoolUnknownDt) {
     std::shared_ptr<CanMessageTemplate> const string_print_template = std::make_shared<CanMessageTemplate>(msg);
     CanMessage response = CanMessage({1, 1}, string_print_template);
     // Values can be calculated as ((1<<8) + 1) for each byte increment. Only 1,2,4,8 bytes are used in this test
-    const std::string string_rep_exp = "CanMessage:\n\tType:StringPrintTest\n\tValues:\n\t\tbyteasbool:true\t\tbaddatatype:Unknown data type \"foo\"\n";
+    const std::string string_rep_exp = "<CanMessage Type=\"StringPrintTest\"/>\n\
+\t<Values>\n\
+\t\t<Value name=\"byteasbool\" datatype=\"bool\" value=\"true\"/>\n\
+\t\t<Value name=\"baddatatype\" datatype=\"foo\" value=\"Unknown data type \"foo\"\n\
+\"/>\n\
+\t</Values>\n\
+</CanMessage>\n";
     std::string string_rep_act = response.to_string();
     GTEST_ASSERT_EQ(string_rep_act, string_rep_exp);
 
@@ -151,7 +164,7 @@ TEST(CanMessage, StringPrintBoolUnknownDt) {
 /*In this test the string printer is tested when no template can be found. This is useful when trying to identify unknown messages.*/
 TEST(CanMessage, StringPrintNULL) {
     CanMessage response = CanMessage({1, 2, 3}, nullptr);
-    const std::string string_rep_exp = "CanMessage:\n\tType:UNKNOWN\n\tDATA: {0x01, 0x02, 0x03}\n";
+    const std::string string_rep_exp = "<CanMessage Type=\"UNKNOWN\"/>\n\t<Values data=\"{0x01, 0x02, 0x03\"}/>\n</CanMessage>\n";
     std::string string_rep_act = response.to_string();
     GTEST_ASSERT_EQ(string_rep_act, string_rep_exp);
     testing::internal::CaptureStdout();
