@@ -131,9 +131,9 @@ template <typename T, typename Op>
 std::vector<uint8_t> ModifierFunction::applyOperation(std::vector<uint8_t> data, T argument1, Op operation) {
     //Converting lhs value to largest integer to prevent overflow
     uint64_t value = convertDataToType<uint64_t>(data);
-    value = operation(value, argument1);
+    uint64_t output = operation(value, argument1);
     //Converting back to minimal integer size to reduce padding
-    return copyTypeToData(value);
+    return copyTypeToData(output);
 }
 
 template <typename Op>

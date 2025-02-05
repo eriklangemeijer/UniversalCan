@@ -83,6 +83,20 @@ TEST(ELM327, ParsePIDString) {
     ASSERT_THAT(parsed_message->data, ::testing::ElementsAre(0x41, 0x00, 0xFC, 0x3E, 0xB0, 0x11));
 }
 
+TEST(ELM327, ParseSPDString) {
+
+    auto mock_serial = std::make_unique<::testing::NiceMock<MockISerial>>();
+    ProtocolDefinitionParser parser = ProtocolDefinitionParser("../../ProtocolDefinitions/bmw_motorrad.xml");
+    ELM327 elm327(std::move(mock_serial), std::make_unique<ProtocolDefinitionParser>(parser));
+
+    std::string str = "01 0D";
+    std::vector<unsigned char> message(str.begin(), str.end());
+    elm327.serialReceiveCallback(message);
+    GTEST_ASSERT_TRUE(elm327.messageAvailable());
+    auto parsed_message = elm327.readMessage();
+    ASSERT_THAT(parsed_message->data, ::testing::ElementsAre(0x01, 0x0D));
+}
+
 TEST(ELM327, RequestMessage) {
     auto mock_serial = std::make_unique<::testing::NiceMock<MockISerial>>();
 
