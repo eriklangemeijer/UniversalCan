@@ -34,11 +34,9 @@ void ELM327::start() {
         this->serialReceiveCallback(message);
     });
     sendATMessage("Z", true);  // Reset
-    // sendATMessage("E0", true); // Echo off
+    sendATMessage("E0", true); // Echo off
     // sendATMessage("L0", true); // Linefeeds off
-    sendATMessage("SP0", true); // Linefeeds off
-
-    this->serial->writeString("01 00\r");
+    sendATMessage("SP0", true); // Set protocol to auto
 
     // sendATMessage("MA"); // Monitor All
 }
@@ -56,7 +54,6 @@ std::vector<uint8_t> ELM327::hexStringToBytes(std::string message_str) {
 }
 
 void ELM327::serialReceiveCallback(std::vector<uint8_t> message) {
-    // std::cout << "REC:" << message << std::endl;
     std::string const message_str(message.begin(), message.end());
     if ((message_str.rfind("ELM327 v", 0) == 0)) {
         this->running = true;
@@ -65,13 +62,15 @@ void ELM327::serialReceiveCallback(std::vector<uint8_t> message) {
         this->ready = true;
     }
 
-    auto msg_template = this->protocol_definition->findMatch(message);
     bool const is_hex = std::all_of(message.begin(), message.end(), [](char character) {
         return std::isxdigit(static_cast<unsigned char>(character)) || character == ' ';
     });
 
     if (is_hex) {
+        std::cout << "Received hex message: " << message_str << std::endl;
         std::vector<uint8_t> data = hexStringToBytes(message_str); 
+        auto msg_template = this->protocol_definition->findMatch(data);
+
         auto can_message = CanMessage(data, msg_template);
         storeMessage(can_message);
     } else {
@@ -130,7 +129,7 @@ bool ELM327::requestMessage(std::string msg_name) {
 
 bool ELM327::messageAvailable() {
     this->message_list_lock.lock();
-    bool const available = !this->message_list.empty();
+    const bool available = !(this->message_list.empty());
     this->message_list_lock.unlock();
     return available;
 }
