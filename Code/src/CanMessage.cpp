@@ -27,7 +27,7 @@ std::string CanMessage::to_string() {
     string_stream << "<CanMessage ";
 
     if (this->msg_template == nullptr) {
-        string_stream << ("Type=\"UNKNOWN\"/>\n");
+        string_stream << ("Type=\"UNKNOWN\">\n");
         string_stream << ("\t<Values data=\"{");
         for (size_t ii = 0; ii < data.size(); ++ii) {
             string_stream << "0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(data[ii]);
@@ -38,7 +38,7 @@ std::string CanMessage::to_string() {
             }
         }
     } else {
-        string_stream << ("Type=\"" + msg_template->getName() + "\"/>\n");
+        string_stream << ("Type=\"" + msg_template->getName() + "\">\n");
         string_stream << ("\t<Values>\n");
         for (auto value : this->values) {
             string_stream << ("\t\t<Value name=\"" + value.getValueName() + "\" datatype=\"" + value.getDataType() + "\" value=\"");
