@@ -32,7 +32,7 @@ std::string CanMessage::to_string() {
         for (size_t ii = 0; ii < data.size(); ++ii) {
             string_stream << "0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(data[ii]);
             if (ii == data.size() - 1) {
-                string_stream << "\"}/>\n";
+                string_stream << "}\"/>\n";
             } else {
                 string_stream << ", ";
             }
